@@ -12,6 +12,7 @@ import Button from '@mui/material/Button';
 import { layoutStates } from '../reducers/layout';
 import { APP_CONST, history } from "../index";
 import { snackBarSeverity, snackBarState } from "../reducers/layout/snackBar";
+import bgImg from '../assets/img/woman_looking_through_records_at_vinyl_shop.jpg';
 import { store } from '../index';
 
 const spotify_client_id = 'a99c487f77d84bf3a88c6cbd671203fd';
@@ -44,8 +45,9 @@ class LoginComponent extends Component {
     }
 
     render() {
+        const { classes } = this.props;
         return (
-            <Container maxWidth={false}>
+            <Container maxWidth={false} className={classes.root}>
                 <Dialog open={true} aria-labelledby="form-dialog-title">
                     <DialogTitle id="form-dialog-title">Connexion</DialogTitle>
                     <DialogContent>
@@ -85,7 +87,7 @@ const spotifyAuthorize = () => {
 const spotifyGetToken = (code, showError) => {
 
     const header = {
-        'Authorization': `Basic ${Buffer.from(`${spotify_client_id}:${spotify_client_secret}`, 'base64')}`,
+        'Authorization': `Basic ${btoa(`${spotify_client_id}:${spotify_client_secret}`)}`,
         'Content-Type': 'application/x-www-form-urlencoded'
     }
 
@@ -101,6 +103,15 @@ const spotifyGetToken = (code, showError) => {
 };
 
 const styles = theme => ({
+    root: {
+        height: '100vh',
+        backgroundImage: 'url(' + bgImg + ')',
+        backgroundPosition: 'center center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',
+        backgroundSize: 'cover'
+
+    }
 });
 
 const mapDispatchToProps = dispatch => ({
