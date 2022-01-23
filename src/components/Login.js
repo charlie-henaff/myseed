@@ -15,10 +15,8 @@ import { snackBarSeverity, snackBarState } from "../reducers/layout/snackBar";
 import bgImg from '../assets/img/woman_looking_through_records_at_vinyl_shop.jpg';
 import { store } from '../index';
 
-const spotify_client_id = 'a99c487f77d84bf3a88c6cbd671203fd';
-const spotify_client_secret = '9fb02c5fd9034ce3bb576009d5d1a1ee';
 const spotify_client_scopes = 'user-read-email user-read-private user-library-read user-follow-read user-top-read user-read-recently-played';
-const spotify_login_callback = 'http://localhost:3000/login';
+const spotify_login_callback = process.env.REACT_APP_BASE_URL+'/login';
 
 class LoginComponent extends Component {
 
@@ -79,7 +77,7 @@ const extractGetters = (getterString) => {
 const spotifyAuthorize = () => {
     window.location = 'https://accounts.spotify.com/authorize' +
         '?response_type=code' +
-        '&client_id=' + spotify_client_id +
+        '&client_id=' + process.env.REACT_APP_SPOTIFY_CLIENT_ID +
         '&scope=' + encodeURIComponent(spotify_client_scopes) +
         '&redirect_uri=' + encodeURIComponent(spotify_login_callback);
 };
@@ -87,7 +85,7 @@ const spotifyAuthorize = () => {
 const spotifyGetToken = (code, showError) => {
 
     const header = {
-        'Authorization': `Basic ${btoa(`${spotify_client_id}:${spotify_client_secret}`)}`,
+        'Authorization': `Basic ${btoa(`${process.env.REACT_APP_SPOTIFY_CLIENT_ID}:${process.env.REACT_APP_SPOTIFY_CLIENT_SECRET}`)}`,
         'Content-Type': 'application/x-www-form-urlencoded'
     }
 

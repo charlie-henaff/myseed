@@ -2,7 +2,6 @@
   "name": "myseed",
   "version": "0.1.0",
   "private": false,
-  "homepage": "https://charlie-henaff.github.io/myseed",
   "dependencies": {
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
@@ -23,7 +22,7 @@
     "react-redux": "^7.2.5",
     "react-router": "^5.2.1",
     "react-router-dom": "^5.3.0",
-    "react-scripts": "4.0.3",
+    "react-scripts": "^5.0.0",
     "redux-form": "^8.3.7",
     "redux-thunk": "^2.3.0",
     "web-vitals": "^1.0.1"

@@ -14,8 +14,6 @@ import {drawerStates} from '../../reducers/layout/drawer';
 import {APP_CONST, history} from '../../index';
 import PropTypes from 'prop-types';
 
-const iOS = process.browser && /iPad|iPhone|iPod/.test(navigator.userAgent);
-
 class Drawer extends Component {
 
   static propTypes = {
@@ -39,8 +37,6 @@ class Drawer extends Component {
 
     return (
         <SwipeableDrawer
-            disableBackdropTransition={!iOS}
-            disableDiscovery={iOS}
             anchor="left"
             open={open}
             onOpen={() => toggle(true)}
