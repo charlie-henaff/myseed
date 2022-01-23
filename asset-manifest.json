@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.js": "/myseed/static/js/main.3f2dac96.chunk.js",
-    "main.js.map": "/myseed/static/js/main.3f2dac96.chunk.js.map",
+    "main.js": "/myseed/static/js/main.2314c808.chunk.js",
+    "main.js.map": "/myseed/static/js/main.2314c808.chunk.js.map",
     "runtime-main.js": "/myseed/static/js/runtime-main.2ef4ab5f.js",
     "runtime-main.js.map": "/myseed/static/js/runtime-main.2ef4ab5f.js.map",
     "static/css/2.c26a67e2.chunk.css": "/myseed/static/css/2.c26a67e2.chunk.css",
-    "static/js/2.c98470f6.chunk.js": "/myseed/static/js/2.c98470f6.chunk.js",
-    "static/js/2.c98470f6.chunk.js.map": "/myseed/static/js/2.c98470f6.chunk.js.map",
+    "static/js/2.d520634c.chunk.js": "/myseed/static/js/2.d520634c.chunk.js",
+    "static/js/2.d520634c.chunk.js.map": "/myseed/static/js/2.d520634c.chunk.js.map",
     "index.html": "/myseed/index.html",
     "static/css/2.c26a67e2.chunk.css.map": "/myseed/static/css/2.c26a67e2.chunk.css.map",
-    "static/js/2.c98470f6.chunk.js.LICENSE.txt": "/myseed/static/js/2.c98470f6.chunk.js.LICENSE.txt",
+    "static/js/2.d520634c.chunk.js.LICENSE.txt": "/myseed/static/js/2.d520634c.chunk.js.LICENSE.txt",
     "static/media/man_listening_music_in_sleeping.7e55c57d.jpg": "/myseed/static/media/man_listening_music_in_sleeping.7e55c57d.jpg",
     "static/media/300.css": "/myseed/static/media/roboto-vietnamese-300-normal.af9afdc1.woff2",
     "static/media/400.css": "/myseed/static/media/roboto-vietnamese-400-normal.c0bec65d.woff2",
@@ -20,7 +20,7 @@
   "entrypoints": [
     "static/js/runtime-main.2ef4ab5f.js",
     "static/css/2.c26a67e2.chunk.css",
-    "static/js/2.c98470f6.chunk.js",
-    "static/js/main.3f2dac96.chunk.js"
+    "static/js/2.d520634c.chunk.js",
+    "static/js/main.2314c808.chunk.js"
   ]
 }
