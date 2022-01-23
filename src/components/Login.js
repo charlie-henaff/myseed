@@ -17,7 +17,7 @@ import { store } from '../index';
 const spotify_client_id = 'a99c487f77d84bf3a88c6cbd671203fd';
 const spotify_client_secret = '9fb02c5fd9034ce3bb576009d5d1a1ee';
 const spotify_client_scopes = 'user-read-email user-read-private user-library-read user-follow-read user-top-read user-read-recently-played';
-const spotify_login_callback = '%PUBLIC_URL%/login';
+const spotify_login_callback = 'http://localhost:3000/login';
 
 class LoginComponent extends Component {
 
