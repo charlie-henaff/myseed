@@ -27,7 +27,8 @@ export const APP_CONST = {
     },
 };
 
-export const history = createBrowserHistory();
+const basename = new URL(process.env.REACT_APP_BASE_URL).pathname;
+export const history = createBrowserHistory({basename: basename});
 export const store = createStore(
     combineReducers({
       app: appState,
@@ -54,4 +55,4 @@ ReactDOM.render(
 // you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.register();
+serviceWorker.unregister();
