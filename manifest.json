@@ -1,6 +1,6 @@
 {
-  "short_name": "MySeed",
-  "name": "MySeed",
+  "short_name": "mySeed",
+  "name": "mySeed",
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",
