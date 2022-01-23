@@ -28,7 +28,7 @@ class Drawer extends Component {
     const {classes, open, toggle} = this.props;
 
     const changeDestination = (destination) => {
-      history.push(destination);
+      history.push( );
       toggle(false);
     };
 
