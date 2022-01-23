@@ -7,7 +7,6 @@ import SnackBar from "./SnackBar";
 import routes from './../../routes';
 import {Switch} from 'react-router-dom';
 import { withStyles } from '@mui/styles';
-import bgImg from '../../assets/img/woman_looking_through_records_at_vinyl_shop.jpg';
 
 class Layout extends Component {
 
@@ -16,9 +15,9 @@ class Layout extends Component {
     };
 
     render() {
-        const {layoutVisible, fullSizeBgImg, classes} = this.props;
+        const {layoutVisible} = this.props;
         return (
-            <div className={fullSizeBgImg && classes.rootFullSizeBgImg}>
+            <>
                 <SnackBar/>
                 {layoutVisible && (
                     <div>
@@ -27,20 +26,13 @@ class Layout extends Component {
                     </div>
                 )}
                 <Switch>{routes}</Switch>
-            </div>
+            </>
         );
     }
 }
 
 const styles = () => ({
-    rootFullSizeBgImg: {
-      height: '100vh',
-      backgroundImage: 'url(' + bgImg + ')',
-      backgroundPosition: 'center center',
-      backgroundRepeat: 'no-repeat',
-      backgroundAttachment: 'fixed',
-      backgroundSize: 'cover'
-  }
+
 });
 
 const mapStateToProps = state => {
