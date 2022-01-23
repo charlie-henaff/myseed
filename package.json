@@ -1,7 +1,8 @@
 {
   "name": "myseed",
-  "version": "1.0",
-  "private": true,
+  "version": "0.1.0",
+  "private": false,
+  "homepage": "https://charlie-henaff.github.io/myseed/",
   "dependencies": {
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
