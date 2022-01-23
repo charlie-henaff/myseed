@@ -5,7 +5,7 @@ CURRENT_PATH 		= $(shell pwd)
 NODE_IMG 			= node:lts-alpine
 NODE_PORTS 			= 3000:3000
 
-RUN_NODE 			= docker run -it --rm -u ${CURRENT_UID}:${CURRENT_GID} -w /usr/src -v ${CURRENT_PATH}:/usr/src -p ${NODE_PORTS} ${NODE_IMG}
+RUN_NODE 			= docker run --rm -u ${CURRENT_UID}:${CURRENT_GID} -w /usr/src -v ${CURRENT_PATH}:/usr/src -p ${NODE_PORTS} ${NODE_IMG}
 
 ## 
 ## Create
