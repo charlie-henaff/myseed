@@ -12,6 +12,7 @@ import Button from '@mui/material/Button';
 import { layoutStates } from '../reducers/layout';
 import { APP_CONST, history } from "../index";
 import { snackBarSeverity, snackBarState } from "../reducers/layout/snackBar";
+import { store } from '../index';
 
 const spotify_client_id = 'a99c487f77d84bf3a88c6cbd671203fd';
 const spotify_client_secret = '9fb02c5fd9034ce3bb576009d5d1a1ee';
@@ -23,16 +24,14 @@ class LoginComponent extends Component {
     static propTypes = {
         classes: PropTypes.object.isRequired,
         location: PropTypes.object.isRequired,
-        layoutVisible: PropTypes.func.isRequired,
-        fullSizeContent: PropTypes.func.isRequired,
         showError: PropTypes.func.isRequired,
         retry: PropTypes.bool
     };
 
     componentDidMount() {
-        const { layoutVisible, fullSizeContent, location, showError } = this.props;
-        layoutVisible(false);
-        fullSizeContent(true);
+        const { location, showError } = this.props;
+        store.dispatch({ type: layoutStates.VISIBLE, visible: false });
+        store.dispatch({ type: layoutStates.FULL_SIZE_CONTENT, fullSizeContent: true });
 
         const { retry } = this.props;
         if (retry) spotifyAuthorize();
@@ -105,8 +104,6 @@ const styles = theme => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    showLayout: (bool) => dispatch({ type: layoutStates.VISIBLE, visible: bool }),
-    fullSizeContent: (bool) => dispatch({ type: layoutStates.FULL_SIZE_CONTENT, fullSizeContent: bool }),
     showError: (msg) => {
         dispatch({ type: snackBarState.severity, severity: snackBarSeverity.error });
         dispatch({ type: snackBarState.message, message: msg });

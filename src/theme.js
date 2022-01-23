@@ -1,21 +1,17 @@
-import {createTheme} from '@mui/material/styles';
+import { createTheme } from '@mui/material/styles';
 
 export default createTheme({
-    palette: {
-      background: {
-        default: '#303030',
-      },
-      primary: {
-        main: 'rgba(41,41,41,0)',
-      },
-      secondary: {
-        main: '#f50057',
-      },
-      divider: 'rgba(255,255,255,0.11)',
+  palette: {
+    primary: {
+      main: '#1976d2',
     },
-    overrides: {
-      body: {
-        margin: 0,
-      },
+    secondary: {
+      main: '#e91e63',
     },
+  },
+  overrides: {
+    body: {
+      margin: 0,
+    },
+  },
 });

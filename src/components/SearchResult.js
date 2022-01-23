@@ -1,19 +1,19 @@
-import React, {Component} from "react";
-import {Box, Container, Grid, LinearProgress} from "@mui/material";
+import React, { Component } from "react";
+import { Box, Container, Grid, LinearProgress } from "@mui/material";
 import { withStyles } from '@mui/styles';
-import {layoutStates} from "../reducers/layout";
-import {APP_CONST, history} from "../index";
+import { layoutStates } from "../reducers/layout";
+import { APP_CONST, history } from "../index";
 import PropTypes from "prop-types";
-import {appBarStates} from "../reducers/layout/appBar";
-import {searchStates} from "../reducers/search"
-import {connect} from "react-redux";
+import { appBarStates } from "../reducers/layout/appBar";
+import { searchStates } from "../reducers/search"
+import { connect } from "react-redux";
 import Typography from "@mui/material/Typography";
 import Artist from "./Util/Card/Artist";
+import { store } from "../index";
 
 class SearchResult extends Component {
 
     static propTypes = {
-        showLayout: PropTypes.func.isRequired,
         dispatchSearch: PropTypes.func.isRequired,
         requestSeach: PropTypes.func.isRequired,
         location: PropTypes.object,
@@ -24,14 +24,14 @@ class SearchResult extends Component {
     }
 
     componentDidMount() {
-        if (!localStorage.getItem(APP_CONST.LOCAL_STORAGE.MYFEED_TOKEN)) {
+        if (!localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN)) {
             history.push('/login');
         }
 
-        const {showLayout} = this.props;
-        showLayout();
+        store.dispatch({ type: layoutStates.VISIBLE, visible: true });
+        store.dispatch({ type: layoutStates.FULL_SIZE_CONTENT, fullSizeContent: false });
 
-        const {searchInput, location, dispatchSearch, requestSeach} = this.props;
+        const { searchInput, location, dispatchSearch, requestSeach } = this.props;
         const urlSearch = location.pathname.split("/")[2];
         if (urlSearch !== undefined && searchInput !== urlSearch) {
             dispatchSearch(urlSearch);
@@ -43,13 +43,13 @@ class SearchResult extends Component {
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const prevSearchInput = prevProps.searchInput;
-        const {searchInput, requestSeach} = this.props;
+        const { searchInput, requestSeach } = this.props;
         if (searchInput.length === 0) history.push('/')
         else if (prevSearchInput !== searchInput) requestSeach(searchInput);
     }
 
     render() {
-        const {searchLoading, searchResult} = this.props;
+        const { searchLoading, searchResult } = this.props;
         const artists = searchResult && searchResult.authors;
 
         const artistGrid = !artists ? "" : (
@@ -57,7 +57,7 @@ class SearchResult extends Component {
                 <Typography variant="h5" gutterBottom>Artistes</Typography>
                 <Grid container spacing={2}>
                     {artists.map(item => {
-                        return <Artist name={item.name} avatarUrl={item.largeImg?.url} key={"artist_" + item.id}/>
+                        return <Artist name={item.name} avatarUrl={item.largeImg?.url} key={"artist_" + item.id} />
                     })}
                 </Grid>
             </Box>
@@ -65,7 +65,7 @@ class SearchResult extends Component {
 
         return (
             <>
-                {searchLoading && <LinearProgress color={"secondary"}/>}
+                {searchLoading && <LinearProgress color="secondary" />}
                 <Container maxWidth={'xl'}>
                     {artistGrid}
                 </Container>
@@ -84,14 +84,14 @@ const actionSeach = (dispatch, input) => {
         'Content-Type': 'application/json'
     }
 
-    dispatch({type: searchStates.LOADING, loading: true});
-    fetch(`${APP_CONST.MYSEED_API_URL}/search/${input}`, {method: 'get', headers: header})
+    dispatch({ type: searchStates.LOADING, loading: true });
+    fetch(`${APP_CONST.MYSEED_API_URL}/search/${input}`, { method: 'get', headers: header })
         .then(response => response.json())
         .then(data => {
             data['@type'] === "hydra:Error"
-                ? dispatch({type: searchStates.ERROR, error: data['hydra:description'] ? data['hydra:description'] : "Une erreur est survenue."})
-                : dispatch({type: searchStates.RESULT, result: data});
-            dispatch({type: searchStates.LOADING, loading: false});
+                ? dispatch({ type: searchStates.ERROR, error: data['hydra:description'] ? data['hydra:description'] : "Une erreur est survenue." })
+                : dispatch({ type: searchStates.RESULT, result: data });
+            dispatch({ type: searchStates.LOADING, loading: false });
         });
 }
 
@@ -100,12 +100,11 @@ const mapStateToProps = state => {
     const searchLoading = state.app.search.loading;
     const searchResult = state.app.search.result;
     const searchError = state.app.search.error;
-    return {searchInput, searchLoading, searchResult, searchError};
+    return { searchInput, searchLoading, searchResult, searchError };
 };
 
 const mapDispatchToProps = dispatch => ({
-    showLayout: () => dispatch({type: layoutStates.VISIBLE, visible: true}),
-    dispatchSearch: txt => dispatch({type: appBarStates.SEARCH, search: txt}),
+    dispatchSearch: txt => dispatch({ type: appBarStates.SEARCH, search: txt }),
     requestSeach: txt => actionSeach(dispatch, txt)
 });
 

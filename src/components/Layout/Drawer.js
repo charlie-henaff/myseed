@@ -7,8 +7,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
-import bgDrawerHeader from '../../assets/img/man_listening_music_in_sleeping.jpg';
-import {withStyles} from '@mui/styles';
+import { withStyles } from '@mui/styles';
 import {HomeRounded as HomeIcon} from '@mui/icons-material';
 import {connect} from 'react-redux';
 import {drawerStates} from '../../reducers/layout/drawer';
@@ -48,12 +47,6 @@ class Drawer extends Component {
             onClose={() => toggle(false)}>
           <Box bgcolor="primary.main"
                color="primary.contrastText"
-               display="flex"
-               flexDirection="column"
-               alignItems="center"
-               justifyContent="flex-end"
-               p={1}
-               pb={16}
                className={classes.header}>
             <Typography variant="h6" gutterBottom={true}>
               MySeed
@@ -76,11 +69,10 @@ class Drawer extends Component {
 const styles = theme => ({
   header: {
     height: 275,
-    backgroundImage: 'url(' + bgDrawerHeader + ')',
-    backgroundPosition: 'center 30%',
-    backgroundRepeat: 'no-repeat',
-    backgroundSize: 'cover',
-    padding: 'center',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'column',
     boxShadow: 'inset 0 0 0 2000px rgba(0, 0, 0, 0.3)',
   },
   menu: {

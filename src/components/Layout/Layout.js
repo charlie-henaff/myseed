@@ -13,7 +13,6 @@ class Layout extends Component {
 
     static propTypes = {
         layoutVisible: PropTypes.bool.isRequired,
-        fullSizeContent: PropTypes.bool.isRequired
     };
 
     render() {
@@ -46,8 +45,7 @@ const styles = () => ({
 
 const mapStateToProps = state => {
     const layoutVisible = state.app.layout.visible;
-    const fullSizeBgImg = state.app.layout.fullSizeContent;
-    return {layoutVisible, fullSizeBgImg};
+    return {layoutVisible};
 };
 
 export default connect(mapStateToProps, null)(withStyles(styles)(Layout));

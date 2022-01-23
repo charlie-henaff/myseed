@@ -5,12 +5,10 @@ import PropTypes from 'prop-types';
 import {APP_CONST, history} from '../index';
 import {layoutStates} from "../reducers/layout";
 import { Box } from '@mui/system';
-
+import {store} from '../index';
 class Home extends Component {
   static propTypes = {
     token: PropTypes.string,
-    showLayout: PropTypes.func.isRequired,
-    fullSizeContent: PropTypes.func.isRequired
   };
 
   componentDidMount() {
@@ -18,9 +16,8 @@ class Home extends Component {
       history.push('/login');
     }
 
-    const {showLayout, fullSizeContent} = this.props;
-    showLayout(true);
-    fullSizeContent(false);
+    store.dispatch({ type: layoutStates.VISIBLE, visible: true });
+    store.dispatch({ type: layoutStates.FULL_SIZE_CONTENT, fullSizeContent: false });
   }
 
   render() {
@@ -42,8 +39,7 @@ const mapStateToProps = state => {
 };
 
 const mapDispatchToProps = dispatch => ({
-  showLayout: (bool) => dispatch({type: layoutStates.VISIBLE, visible: bool}),
-  fullSizeContent: (bool) => dispatch({ type: layoutStates.FULL_SIZE_CONTENT, fullSizeContent: bool }),
+  
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Home));
