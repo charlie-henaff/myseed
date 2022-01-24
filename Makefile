@@ -1,4 +1,4 @@
-include .env .env.local
+-include .env .env.local
 
 CURRENT_UID 		= $(shell id -u)
 CURRENT_GID 		= $(shell id -g)
