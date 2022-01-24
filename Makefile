@@ -42,7 +42,7 @@ install: yarn.lock
 
 start: ## Start project
 start: install
-	${RUN_NODE} yarn start
+	@${RUN_NODE} yarn start
 
 .PHONY: start
 
