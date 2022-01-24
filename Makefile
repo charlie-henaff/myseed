@@ -1,3 +1,5 @@
+include .env .env.local
+
 CURRENT_UID 		= $(shell id -u)
 CURRENT_GID 		= $(shell id -g)
 CURRENT_PATH 		= $(shell pwd)
@@ -5,7 +7,7 @@ CURRENT_PATH 		= $(shell pwd)
 NODE_IMG 			= node:lts-alpine
 NODE_PORTS 			= 3000:3000
 
-RUN_NODE 			= docker run --rm -u ${CURRENT_UID}:${CURRENT_GID} -w /usr/src -v ${CURRENT_PATH}:/usr/src -p ${NODE_PORTS} ${NODE_IMG}
+RUN_NODE 			= docker run ${DOCKER_EXTRA_PARAMS} --rm -u ${CURRENT_UID}:${CURRENT_GID} -w /usr/src -v ${CURRENT_PATH}:/usr/src -p ${NODE_PORTS} ${NODE_IMG}
 
 ## 
 ## Create
@@ -40,7 +42,7 @@ install: yarn.lock
 
 start: ## Start project
 start: install
-	@${RUN_NODE} yarn start
+	${RUN_NODE} yarn start
 
 .PHONY: start
 
