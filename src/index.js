@@ -28,6 +28,7 @@ export const APP_CONST = {
 };
 
 export const basePath = new URL(process.env.REACT_APP_BASE_URL).pathname;
+console.log(basePath);
 export const history = createBrowserHistory({basename: basePath});
 export const store = createStore(
     combineReducers({
