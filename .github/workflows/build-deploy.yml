@@ -33,8 +33,6 @@ jobs:
     - name: Build files
       run: make yarn cmd=build
       env:
-        PUBLIC_URL: https://charlie-henaff.github.io/myseed
-        REACT_APP_BASE_URL: https://charlie-henaff.github.io/myseed
         REACT_APP_SPOTIFY_CLIENT_ID: ${{ secrets.REACT_APP_SPOTIFY_CLIENT_ID }}
         REACT_APP_SPOTIFY_CLIENT_SECRET: ${{ secrets.REACT_APP_SPOTIFY_CLIENT_SECRET }}
     
