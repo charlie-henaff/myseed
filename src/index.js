@@ -27,8 +27,9 @@ export const APP_CONST = {
     },
 };
 
-console.log(window.location.pathname); // TODO: remove
-export const history = createBrowserHistory({basename: window.location.pathname});
+export const basePath = new URL(process.env.REACT_APP_BASE_URL).pathname;
+console.log(basePath); // TODO: remove
+export const history = createBrowserHistory({basename: basePath});
 export const store = createStore(
     combineReducers({
       app: appState,
