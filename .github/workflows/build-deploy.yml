@@ -32,6 +32,10 @@ jobs:
 
     - name: Build files
       run: make yarn cmd=build
+      env:
+        REACT_APP_BASE_URL: ${{ secrets.REACT_APP_BASE_URL }}
+        REACT_APP_SPOTIFY_CLIENT_ID: ${{ secrets.REACT_APP_SPOTIFY_CLIENT_ID }}
+        REACT_APP_SPOTIFY_CLIENT_SECRET: ${{ secrets.REACT_APP_SPOTIFY_CLIENT_SECRET }}
     
     - name: Upload production-ready build files
       uses: actions/upload-artifact@v2
