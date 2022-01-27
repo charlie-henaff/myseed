@@ -1,4 +1,3 @@
-![GitHub last commit](https://img.shields.io/github/last-commit/charlie-henaff/myseed)
 ![CI/CD](https://github.com/charlie-henaff/myseed/workflows/CI/CD/badge.svg)
 ![License](https://img.shields.io/github/license/charlie-henaff/myseed)
 
