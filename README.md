@@ -1,3 +1,6 @@
+![CI/CD](https://github.com/charlie-henaff/myseed/workflows/CI/CD/badge.svg)
+![License](https://img.shields.io/github/license/dyarleniber/react-workflow-gh-actions)
+
 # MySeed 
 
 **MySeed, grow your discoveries** *a personal media hub*
