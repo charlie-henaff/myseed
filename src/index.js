@@ -4,8 +4,8 @@ import {applyMiddleware, combineReducers, compose, createStore} from 'redux';
 import {Provider} from 'react-redux';
 import thunk from 'redux-thunk';
 import {reducer as form} from 'redux-form';
-import {createBrowserHistory} from 'history';
-import {ConnectedRouter, connectRouter, routerMiddleware,} from 'connected-react-router';
+import {createHashHistory} from 'history';
+import {ConnectedRouter, connectRouter, routerMiddleware} from 'connected-react-router';
 import * as serviceWorker from './serviceWorker';
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
@@ -27,9 +27,8 @@ export const APP_CONST = {
     },
 };
 
-export const basePath = new URL(process.env.PUBLIC_URL).pathname;
-console.log(basePath); // TODO: remove
-export const history = createBrowserHistory({basename: basePath});
+export const basePath =  new URL(process.env.REACT_APP_BASE_URL).pathname;
+export const history = createHashHistory({basename: basePath});
 export const store = createStore(
     combineReducers({
       app: appState,
