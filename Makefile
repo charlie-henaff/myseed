@@ -3,12 +3,11 @@
 CURRENT_UID 		= $(shell id -u)
 CURRENT_GID 		= $(shell id -g)
 CURRENT_PATH 		= $(shell pwd)
-CURENT_GIT_CONF		= ~/.gitconfig
 
-NODE_IMG 			= node:lts-buster
+NODE_IMG 			= node:lts-alpine
 NODE_PORTS 			= 3000:3000
 
-DOCKER_VOLUMES		= -v ${CURRENT_PATH}:/usr/src -v ${CURENT_GIT_CONF}:/etc/gitconfig
+DOCKER_VOLUMES		= -v ${CURRENT_PATH}:/usr/src
 DOCKER_RUN			= docker run ${DOCKER_EXTRA_PARAMS} --rm -u ${CURRENT_UID}:${CURRENT_GID} 
 DOCKER_RUN_NODE 	= ${DOCKER_RUN} -w /usr/src ${DOCKER_VOLUMES} -p ${NODE_PORTS} ${NODE_IMG}
 

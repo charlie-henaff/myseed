@@ -1,4 +1,5 @@
 name: CI/CD
+
 on:
   push:
     branches:
@@ -25,24 +26,40 @@ jobs:
           ${{ runner.os }}-build-
           ${{ runner.os }}-
 
-    - name: Install 
+    - name: Install dependencies
       if: steps.cache-nodemodules.outputs.cache-hit != 'true'
       run: yarn install
-
-    - name: Build
-      run: yarn build
-      env: 
-        PUBLIC_URL: 'https://charlie-henaff.github.io/myseed'
-        REACT_APP_BASE_URL: 'https://charlie-henaff.github.io/myseed'
     
-    - name: Deploy
-      run: |
-        git config --global user.name $user_name
-        git config --global user.email $user_email
-        git remote set-url origin https://${github_token}@github.com/${repository}
-        yarn deploy
+    - name: Build files
+      run: yarn build
       env:
-        user_name: 'github-actions[bot]'
-        user_email: 'github-actions[bot]@users.noreply.github.com'
-        github_token: ${{ secrets.ACTIONS_DEPLOY_ACCESS_TOKEN }}
-        repository: ${{ github.repository }}
+        PUBLIC_URL: https://charlie-henaff.github.io/myseed
+        REACT_APP_BASE_URL: https://charlie-henaff.github.io/myseed
+        REACT_APP_SPOTIFY_CLIENT_ID: ${{ secrets.REACT_APP_SPOTIFY_CLIENT_ID }}
+        REACT_APP_SPOTIFY_CLIENT_SECRET: ${{ secrets.REACT_APP_SPOTIFY_CLIENT_SECRET }} 
+        
+    
+    - name: Upload production-ready build files
+      uses: actions/upload-artifact@v2
+      with:
+        name: production-files
+        path: ./build
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: production-files
+        path: ./build
+
+    - name: Deploy to gh-pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./build
