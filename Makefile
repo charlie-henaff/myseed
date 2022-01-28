@@ -3,11 +3,14 @@
 CURRENT_UID 		= $(shell id -u)
 CURRENT_GID 		= $(shell id -g)
 CURRENT_PATH 		= $(shell pwd)
+CURENT_GIT_CONF		= ~/.gitconfig
 
-NODE_IMG 			= node:lts-alpine
+NODE_IMG 			= node:lts-buster
 NODE_PORTS 			= 3000:3000
 
-RUN_NODE 			= docker run ${DOCKER_EXTRA_PARAMS} --rm -u ${CURRENT_UID}:${CURRENT_GID} -w /usr/src -v ${CURRENT_PATH}:/usr/src -p ${NODE_PORTS} ${NODE_IMG}
+DOCKER_VOLUMES		= -v ${CURRENT_PATH}:/usr/src -v ${CURENT_GIT_CONF}:/etc/gitconfig
+DOCKER_RUN			= docker run ${DOCKER_EXTRA_PARAMS} --rm -u ${CURRENT_UID}:${CURRENT_GID} 
+DOCKER_RUN_NODE 	= ${DOCKER_RUN} -w /usr/src ${DOCKER_VOLUMES} -p ${NODE_PORTS} ${NODE_IMG}
 
 ## 
 ## Create
@@ -15,7 +18,7 @@ RUN_NODE 			= docker run ${DOCKER_EXTRA_PARAMS} --rm -u ${CURRENT_UID}:${CURRENT
 ## 
 
 create-react-app: ## args: name - Create a react app
-	@${RUN_NODE} npx create-react-app ${name}
+	@${DOCKER_RUN_NODE} npx create-react-app ${name}
 
 .PHONY: create-react-app
 
@@ -25,10 +28,10 @@ create-react-app: ## args: name - Create a react app
 ## 
 
 node: ## args: cmd - Execute a node command
-	@${RUN_NODE} ${cmd}
+	@${DOCKER_RUN_NODE} ${cmd}
 
 yarn: ## args: cmd - Execute a yarn command
-	@${RUN_NODE} yarn ${cmd}
+	@${DOCKER_RUN_NODE} yarn ${cmd}
 
 .PHONY: node yarn
 
@@ -38,11 +41,11 @@ yarn: ## args: cmd - Execute a yarn command
 ## 
 
 install: yarn.lock
-	@${RUN_NODE} yarn install
+	@${DOCKER_RUN_NODE} yarn install
 
 start: ## Start project
 start: install
-	@${RUN_NODE} yarn start
+	@${DOCKER_RUN_NODE} yarn start
 
 .PHONY: start
 
