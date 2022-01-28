@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/myseed/static/css/main.0d4fc21b.css",
-    "main.js": "/myseed/static/js/main.8b7303f4.js",
+    "main.js": "/myseed/static/js/main.59b98a00.js",
     "static/media/man_listening_music_in_sleeping.jpg": "/myseed/static/media/man_listening_music_in_sleeping.7e55c57dc59e6e97f493.jpg",
     "static/media/woman_looking_through_records_at_vinyl_shop.jpg": "/myseed/static/media/woman_looking_through_records_at_vinyl_shop.a244399618327e4e877a.jpg",
     "static/media/roboto-all-500-normal.woff": "/myseed/static/media/roboto-all-500-normal.52cb737b682eb9661ee1.woff",
@@ -38,10 +38,10 @@
     "static/media/roboto-greek-ext-700-normal.woff2": "/myseed/static/media/roboto-greek-ext-700-normal.9674bc0ae12c2551d9d1.woff2",
     "index.html": "/myseed/index.html",
     "main.0d4fc21b.css.map": "/myseed/static/css/main.0d4fc21b.css.map",
-    "main.8b7303f4.js.map": "/myseed/static/js/main.8b7303f4.js.map"
+    "main.59b98a00.js.map": "/myseed/static/js/main.59b98a00.js.map"
   },
   "entrypoints": [
     "static/css/main.0d4fc21b.css",
-    "static/js/main.8b7303f4.js"
+    "static/js/main.59b98a00.js"
   ]
 }
