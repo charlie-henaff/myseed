@@ -2,7 +2,7 @@ import React from "react";
 import {connect} from "react-redux"
 import PropTypes from "prop-types";
 import Snackbar from "@mui/material/Snackbar";
-import {snackBarSeverity, snackBarState} from "../../reducers/layout/snackBar";
+import {snackBarSeverity, snackBarState} from "../../redux/reducers/layout/snackBar";
 import MuiAlert from '@mui/material/Alert';
 import { withStyles } from '@mui/styles';
 

@@ -9,9 +9,9 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
-import { drawerStates } from '../../reducers/layout/drawer';
-import { appBarStates } from "../../reducers/layout/appBar";
-import { history } from "../../index";
+import { drawerStates } from '../../redux/reducers/layout/drawer';
+import { appBarStates } from "../../redux/reducers/layout/appBar";
+import history from "../../history";
 import { alpha } from '@mui/system';
 
 class AppBar extends Component {

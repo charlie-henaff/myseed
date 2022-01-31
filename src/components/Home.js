@@ -2,10 +2,11 @@ import React, {Component} from 'react';
 import { withStyles } from '@mui/styles';
 import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
-import {APP_CONST, history} from '../index';
-import {layoutStates} from "../reducers/layout";
+import {APP_CONST} from '../index';
+import {layoutStates} from "../redux/reducers/layout";
 import { Box } from '@mui/system';
-import {store} from '../index';
+import store from '../redux/store';
+import history from '../history';
 class Home extends Component {
   static propTypes = {
     token: PropTypes.string,

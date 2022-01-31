@@ -1,15 +1,16 @@
 import React, { Component } from "react";
 import { Box, Container, Grid, LinearProgress } from "@mui/material";
 import { withStyles } from '@mui/styles';
-import { layoutStates } from "../reducers/layout";
-import { APP_CONST, history } from "../index";
+import { layoutStates } from "../redux/reducers/layout";
+import { APP_CONST } from "../index";
 import PropTypes from "prop-types";
-import { appBarStates } from "../reducers/layout/appBar";
-import { searchStates } from "../reducers/search"
+import { appBarStates } from "../redux/reducers/layout/appBar";
+import { searchStates } from "../redux/reducers/search"
 import { connect } from "react-redux";
 import Typography from "@mui/material/Typography";
 import Artist from "./Util/Card/Artist";
-import { store } from "../index";
+import store from "../redux/store";
+import history from '../history';
 
 class SearchResult extends Component {
 
@@ -32,7 +33,7 @@ class SearchResult extends Component {
         store.dispatch({ type: layoutStates.FULL_SIZE_CONTENT, fullSizeContent: false });
 
         const { searchInput, location, dispatchSearch, requestSeach } = this.props;
-        const urlSearch = location.pathname.split("/")[2];
+        const urlSearch = location.pathname.split("/").pop();
         if (urlSearch !== undefined && searchInput !== urlSearch) {
             dispatchSearch(urlSearch);
         } else {
@@ -80,16 +81,16 @@ const styles = (theme) => {
 
 const actionSeach = (dispatch, input) => {
     const header = {
-        'Authorization': `Bearer ${localStorage.getItem(APP_CONST.LOCAL_STORAGE.MYFEED_TOKEN)}`,
+        'Authorization': `Bearer ${localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN)}`,
         'Content-Type': 'application/json'
     }
 
     dispatch({ type: searchStates.LOADING, loading: true });
-    fetch(`${APP_CONST.MYSEED_API_URL}/search/${input}`, { method: 'get', headers: header })
+    fetch(`${process.env.REACT_APP_SPOTIFY_API_ENDPOINT}/search?q=${input}`, { method: 'get', headers: header })
         .then(response => response.json())
         .then(data => {
-            data['@type'] === "hydra:Error"
-                ? dispatch({ type: searchStates.ERROR, error: data['hydra:description'] ? data['hydra:description'] : "Une erreur est survenue." })
+            data['error']
+                ? dispatch({ type: searchStates.ERROR, error: data['error']['message'] || "Une erreur est survenue." })
                 : dispatch({ type: searchStates.RESULT, result: data });
             dispatch({ type: searchStates.LOADING, loading: false });
         });
