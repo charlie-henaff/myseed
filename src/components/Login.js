@@ -16,7 +16,7 @@ import bgImg from '../assets/img/woman_looking_through_records_at_vinyl_shop.jpg
 import { store } from '../index';
 
 const spotify_client_scopes = 'user-read-email user-read-private user-library-read user-follow-read user-top-read user-read-recently-played';
-const spotify_login_callback = process.env.REACT_APP_BASE_URL+'/#/login';
+const spotify_login_callback = process.env.PUBLIC_URL+'/login';
 
 class LoginComponent extends Component {
 
@@ -95,7 +95,6 @@ const spotifyGetToken = (code, showError) => {
         .then(response => response.json())
         .then(data => {
             localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN, data.access_token);
-            console.log(localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN));
             localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_REFRESH_TOKEN, data.refresh_token);
             history.push('/');
         });
