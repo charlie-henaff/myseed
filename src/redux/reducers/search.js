@@ -26,28 +26,10 @@ export function result(state = null, action) {
   }
 }
 
-export function error(state = {}, action) {
+export function error(state = null, action) {
   switch (action.type) {
     case searchStates.ERROR:
-      return {
-        ...state,
-        app: {
-          ...state.app,
-          layout: {
-            ...state.app.layout,
-            snackBar: {
-              ...state.app.layout.snackBar,
-              severity: snackBarSeverity.error,
-              message: action.error,
-              isOpen: true
-            }
-          },
-          search: {
-            ...state.app.search,
-            error: action.error
-          }
-        }
-      }
+      return action.error;
     default:
       return state;
   }
