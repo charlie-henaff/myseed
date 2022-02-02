@@ -1,6 +1,4 @@
 import { combineReducers } from 'redux';
-import { snackBarSeverity } from './layout/snackBar';
-import appState from '.';
 
 export const searchStates = {
   LOADING: 'SEARCH_LOADING',
