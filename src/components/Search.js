@@ -86,8 +86,13 @@ const actionSeach = (dispatch, input) => {
         'Content-Type': 'application/json'
     });
 
+    const params = [
+        `q=${input}`,
+        "type=album,artist,track" 
+    ];
+
     dispatch({ type: searchStates.LOADING, loading: true });
-    spotifyFetch(`${process.env.REACT_APP_SPOTIFY_API_ENDPOINT}/search?q=${input}`, { method: 'get', headers: header })
+    spotifyFetch(`${process.env.REACT_APP_SPOTIFY_API_ENDPOINT}/search?${params.join('&')}`, { method: 'get', headers: header })
         .then(response => response.json())
         .catch(error => {
             if (error.message) {
