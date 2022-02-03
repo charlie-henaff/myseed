@@ -52,18 +52,18 @@ class Search extends Component {
 
     render() {
         const { searchLoading, searchResult } = this.props;
-        const artists = searchResult && searchResult.authors;
+        const artists = searchResult && searchResult.artists.items;
 
         const artistGrid = !artists ? "" : (
             <Box py={2}>
                 <Typography variant="h5" gutterBottom>Artistes</Typography>
                 <Grid container spacing={2}>
                     {artists.map(item => {
-                        return <Artist name={item.name} avatarUrl={item.largeImg?.url} key={"artist_" + item.id} />
+                        return <Artist name={item.name} avatarUrl={item.images.pop()?.url} key={"artist_" + item.id} />
                     })}
                 </Grid>
             </Box>
-        )
+        );
 
         return (
             <>
@@ -88,18 +88,19 @@ const actionSeach = (dispatch, input) => {
 
     const params = [
         `q=${input}`,
-        "type=album,artist,track" 
+        "type=album,artist,track",
+        "limit=12"
     ];
 
     dispatch({ type: searchStates.LOADING, loading: true });
     spotifyFetch(`${process.env.REACT_APP_SPOTIFY_API_ENDPOINT}/search?${params.join('&')}`, { method: 'get', headers: header })
-        .then(response => response.json())
+        .then(result => dispatch({ type: searchStates.RESULT, result: result }))
+        .finally(() => dispatch({ type: searchStates.LOADING, loading: false }))
         .catch(error => {
             if (error.message) {
                 dispatch({ type: searchStates.ERROR, error: (error.message || "Une erreur est survenue.") });
             }
-        })
-        .finally(() => dispatch({ type: searchStates.LOADING, loading: false }));
+        });
 }
 
 const mapStateToProps = state => {

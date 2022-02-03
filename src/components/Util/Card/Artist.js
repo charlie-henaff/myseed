@@ -14,7 +14,6 @@ class Artist extends Component {
         };
     }
 
-
     static propTypes = {
         name: PropTypes.string,
         avatarUrl: PropTypes.string,

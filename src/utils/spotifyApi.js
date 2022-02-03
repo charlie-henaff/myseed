@@ -12,7 +12,7 @@ export function fetch(uri, options = {}) {
 
   return global.fetch(new URL(uri, process.env.REACT_APP_SPOTIFY_API_ENDPOINT), options)
     .then(response => {
-      if (response.ok) return response;
+      if (response.ok) return response.json();
       return response.json()
         .then(
           json => { if (json.error.message) throw new Error(json.error.message); },
