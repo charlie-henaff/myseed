@@ -11,6 +11,7 @@ import Typography from "@mui/material/Typography";
 import Artist from "./Util/Card/Artist";
 import store from "../redux/store";
 import history from '../history';
+import { fetch as spotifyFetch } from '../utils/spotifyApi';
 
 class SearchResult extends Component {
 
@@ -80,20 +81,20 @@ const styles = (theme) => {
 };
 
 const actionSeach = (dispatch, input) => {
-    const header = {
+    const header = new Headers({
         'Authorization': `Bearer ${localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN)}`,
         'Content-Type': 'application/json'
-    }
+    });
 
     dispatch({ type: searchStates.LOADING, loading: true });
-    fetch(`${process.env.REACT_APP_SPOTIFY_API_ENDPOINT}/search?q=${input}`, { method: 'get', headers: header })
+    spotifyFetch(`${process.env.REACT_APP_SPOTIFY_API_ENDPOINT}/search?q=${input}`, { method: 'get', headers: header })
         .then(response => response.json())
-        .then(data => {
-            data['error']
-                ? dispatch({ type: searchStates.ERROR, error: data['error']['message'] || "Une erreur est survenue." })
-                : dispatch({ type: searchStates.RESULT, result: data });
-            dispatch({ type: searchStates.LOADING, loading: false });
-        });
+        .catch(error => {
+            if (error.message) {
+                dispatch({ type: searchStates.ERROR, error: (error.message || "Une erreur est survenue.") });
+            }
+        })
+        .finally(() => dispatch({ type: searchStates.LOADING, loading: false }));
 }
 
 const mapStateToProps = state => {
