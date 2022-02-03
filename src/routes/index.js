@@ -3,7 +3,7 @@ import {Redirect} from 'react-router';
 import React from 'react';
 import Login from '../components/Login';
 import Home from '../components/Home';
-import SearchResult from '../components/SearchResult';
+import SearchResult from '../components/Search';
 import {APP_CONST} from '../index';
 
 function LoginCheckedRoute({component: Component, authed, ...rest}) {

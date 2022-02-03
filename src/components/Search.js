@@ -13,7 +13,7 @@ import store from "../redux/store";
 import history from '../history';
 import { fetch as spotifyFetch } from '../utils/spotifyApi';
 
-class SearchResult extends Component {
+class Search extends Component {
 
     static propTypes = {
         dispatchSearch: PropTypes.func.isRequired,
@@ -110,4 +110,4 @@ const mapDispatchToProps = dispatch => ({
     requestSeach: txt => actionSeach(dispatch, txt)
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(SearchResult));
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Search));

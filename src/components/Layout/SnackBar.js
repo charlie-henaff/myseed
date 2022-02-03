@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import {connect} from "react-redux"
 import PropTypes from "prop-types";
 import Snackbar from "@mui/material/Snackbar";
@@ -8,9 +8,9 @@ import { withStyles } from '@mui/styles';
 
 const {Component} = require("react");
 
-function Alert(props) {
+const Alert = forwardRef((props, ref) => {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
-}
+});
 
 class SnackBar extends Component {
 
