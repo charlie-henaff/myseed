@@ -8,6 +8,18 @@ export default createTheme({
     secondary: {
       main: '#e91e63',
     },
+    error: {
+      main: '#ff5252',
+    },
+    warning: {
+      main: '#ffab40',
+    },
+    info: {
+      main: '#448aff',
+    },
+    success: {
+      main: '#69f0ae',
+    },
   },
   overrides: {
     body: {
