@@ -53,23 +53,43 @@ class Search extends Component {
     render() {
         const { searchLoading, searchResult } = this.props;
         const artists = searchResult && searchResult.artists.items;
-
-        const artistGrid = !artists ? "" : (
-            <Box py={2}>
-                <Typography variant="h5" gutterBottom>Artistes</Typography>
-                <Grid container spacing={2}>
-                    {artists.map(item => {
-                        return <Artist name={item.name} avatarUrl={item.images.pop()?.url} key={"artist_" + item.id} />
-                    })}
-                </Grid>
-            </Box>
-        );
+        const albums = searchResult && searchResult.albums.items;
+        const tracks = searchResult && searchResult.tracks.items;
 
         return (
             <>
                 {searchLoading && <LinearProgress color="secondary" />}
                 <Container maxWidth={'xl'}>
-                    {artistGrid}
+                    {!artists ? "" : (
+                        <Box py={2}>
+                            <Typography variant="h6" gutterBottom>Artistes</Typography>
+                            <Grid container spacing={2}>
+                                {artists.map(item => {
+                                    return <Artist name={item.name} avatarUrl={item.images?.pop()?.url} key={"artist_" + item.id} />
+                                })}
+                            </Grid>
+                        </Box>
+                    )}
+                    {!albums ? "" : (
+                        <Box py={2}>
+                            <Typography variant="h6" gutterBottom>Albums</Typography>
+                            <Grid container spacing={2}>
+                                {albums.map(item => {
+                                    return <Artist name={item.name} avatarUrl={item.images?.pop()?.url} key={"artist_" + item.id} />
+                                })}
+                            </Grid>
+                        </Box>
+                    )}
+                    {!tracks ? "" : (
+                        <Box py={2}>
+                            <Typography variant="h6" gutterBottom>Musiques</Typography>
+                            <Grid container spacing={2}>
+                                {tracks.map(item => {
+                                    return <Artist name={item.name} avatarUrl={item.album?.images?.pop()?.url} key={"artist_" + item.id} />
+                                })}
+                            </Grid>
+                        </Box>
+                    )}
                 </Container>
             </>
         );
@@ -89,7 +109,7 @@ const actionSeach = (dispatch, input) => {
     const params = [
         `q=${input}`,
         "type=album,artist,track",
-        "limit=12"
+        "limit=6"
     ];
 
     dispatch({ type: searchStates.LOADING, loading: true });
