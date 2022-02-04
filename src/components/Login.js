@@ -9,11 +9,12 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
-import { layoutStates } from '../reducers/layout';
-import { APP_CONST, history } from "../index";
-import { snackBarSeverity, snackBarState } from "../reducers/layout/snackBar";
+import { layoutStates } from '../redux/reducers/layout';
+import { APP_CONST } from "../index";
+import { snackBarSeverity, snackBarState } from "../redux/reducers/layout/snackBar";
 import bgImg from '../assets/img/woman_looking_through_records_at_vinyl_shop.jpg';
-import { store } from '../index';
+import store from '../redux/store';
+import history from '../history';
 
 const spotify_client_scopes = 'user-read-email user-read-private user-library-read user-follow-read user-top-read user-read-recently-played';
 const spotify_login_callback = process.env.REACT_APP_BASE_URL + '/login';

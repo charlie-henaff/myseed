@@ -1,16 +1,16 @@
 import React from "react";
-import {connect} from "react-redux"
+import { connect } from "react-redux"
 import PropTypes from "prop-types";
 import Snackbar from "@mui/material/Snackbar";
-import {snackBarSeverity, snackBarState} from "../../reducers/layout/snackBar";
+import { snackBarSeverity, snackBarState } from "../../redux/reducers/layout/snackBar";
 import MuiAlert from '@mui/material/Alert';
 import { withStyles } from '@mui/styles';
 
-const {Component} = require("react");
+const { Component } = require("react");
 
-function Alert(props) {
-    return <MuiAlert elevation={6} variant="filled" {...props} />;
-}
+const Alert = React.forwardRef(function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 class SnackBar extends Component {
 
@@ -23,20 +23,23 @@ class SnackBar extends Component {
     }
 
     render() {
-        const {classes, severity, message, isOpen, close} = this.props;
+        const { classes, severity, message, isOpen, close } = this.props;
+
         const handleClose = (event, reason) => {
             if (reason === 'clickaway') {
                 return;
             }
             close();
         };
+
         return (
             <Snackbar className={classes.root} open={isOpen} onClose={handleClose}
-                      anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
-                      message={severity === snackBarSeverity.default && message}
-                      autoHideDuration={6000}>
+                message={severity === snackBarSeverity.default && message}
+                autoHideDuration={6000}>
                 {severity !== snackBarSeverity.default &&
-                <Alert onClose={handleClose} severity={severity}>{message}</Alert>}
+                    <Alert onClose={handleClose} severity={severity} sx={{ width: '100%' }}>
+                        {message}
+                    </Alert>}
             </Snackbar>
 
         );
@@ -59,11 +62,11 @@ const mapStateToProps = state => {
     const severity = state.app.layout.snackBar.severity;
     const message = state.app.layout.snackBar.message;
     const isOpen = state.app.layout.snackBar.isOpen;
-    return {severity, message, isOpen};
+    return { severity, message, isOpen };
 };
 
 const mapDispatchToProps = dispatch => ({
-    close: () => dispatch({type: snackBarState.isOpen, isOpen: false})
+    close: () => dispatch({ type: snackBarState.isOpen, isOpen: false })
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(SnackBar));

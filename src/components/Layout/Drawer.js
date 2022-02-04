@@ -10,9 +10,10 @@ import Typography from '@mui/material/Typography';
 import { withStyles } from '@mui/styles';
 import {HomeRounded as HomeIcon} from '@mui/icons-material';
 import {connect} from 'react-redux';
-import {drawerStates} from '../../reducers/layout/drawer';
-import {APP_CONST, history} from '../../index';
+import {drawerStates} from '../../redux/reducers/layout/drawer';
+import {APP_CONST} from '../../index';
 import PropTypes from 'prop-types';
+import history from '../../history';
 
 class Drawer extends Component {
 

@@ -1,12 +1,12 @@
-import {combineReducers} from 'redux';
+import { combineReducers } from 'redux';
 
 export const searchStates = {
-    LOADING: 'SEARCH_LOADING',
-    RESULT: 'SEARCH_RESULT',
-    ERROR: 'SEARCH_ERROR'
+  LOADING: 'SEARCH_LOADING',
+  RESULT: 'SEARCH_RESULT',
+  ERROR: 'SEARCH_ERROR'
 };
 
-export function loading(state = false, action) {
+export function loading(state = null, action) {
   switch (action.type) {
     case searchStates.LOADING:
       return action.loading;
@@ -33,5 +33,5 @@ export function error(state = null, action) {
   }
 }
 
-export default combineReducers({loading, result, error});
+export default combineReducers({ loading, result, error });
 
