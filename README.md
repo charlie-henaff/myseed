@@ -2,7 +2,7 @@
 
 # MySeed 
 
->**MySeed, grow your discoveries** *a personal media hub*  
+<!-- >**MySeed, grow your discoveries** *a personal media hub*   -->
 
 MySeed is a Spotify API-based web UI that helps users discover music  
 It's also a personal project that helps me improve and practice coding  
