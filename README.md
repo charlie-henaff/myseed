@@ -4,9 +4,8 @@
 
 >**MySeed, grow your discoveries** *a personal media hub*  
 
-MySeed is a web UI based on spotify API that help users to discover music
-
-It's alougth a personal project use to icrease my skills and learn new things
+MySeed is a Spotify API-based web UI that helps users discover music  
+It's also a personal project that helps me improve and practice coding  
 
 # How to use ?
 
