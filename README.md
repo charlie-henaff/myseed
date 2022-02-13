@@ -2,7 +2,11 @@
 
 # MySeed 
 
-**MySeed, grow your discoveries** *a personal media hub*
+>**MySeed, grow your discoveries** *a personal media hub*  
+
+MySeed is a web UI based on spotify API that help users to discover music
+
+It's alougth a personal project use to icrease my skills and learn new things
 
 # How to use ?
 
@@ -22,11 +26,10 @@ After start, application should be available at [localhost:3000](https://localho
 
 # Concept
 
-> Every time I go onto Spotify to listen music I tell me this : It's always the same songs... 
->
+> Every time I go onto Spotify to listen music I tell me this : It's always the same songs...  
 > Yes Spotify know my tastes but sometime I just want to discover new things
 
-- Why Spotify always show me same music ?
+<!-- - Why Spotify always show me same music ?
     - Cause they know that I like these musics
 - Why Spotify know my music taste ?
     - Cause I give it to them
@@ -35,11 +38,11 @@ After start, application should be available at [localhost:3000](https://localho
 - Why I'll like a music ?
     - Cause it remembers me a good moment
     - Cause lyrics speack to me
-    - Cause I like the vibes
+    - Cause I like the vibes -->
 
 So let's try to create an app that offers new music that users do not know, but that can refer to good times, lyrics that speak to them or musical vibrations liked.
 
-# Modules
+<!-- # Modules
 MySeed is like an hub to discover music / streams / videos / art ...  
 It includes "modules" that can help user in there discoveries
 
@@ -50,4 +53,4 @@ Settings        |   Details
 --------        |   -------
 search          |   playlist based on search string (user / album / song / genre)
 new             |   playlist of new songs never heard by this user
-genre           |   playlist of songs only for the selected genres
+genre           |   playlist of songs only for the selected genres -->
