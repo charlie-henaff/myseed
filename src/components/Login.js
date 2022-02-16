@@ -19,6 +19,14 @@ import history from '../history';
 const spotify_client_scopes = 'user-read-email user-read-private user-library-read user-follow-read user-top-read user-read-recently-played';
 const spotify_login_callback = process.env.REACT_APP_BASE_URL + '/login';
 
+export function isLoggedIn() {
+    const now = new Date();
+    const spotifyToken = localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN);
+    const spotifyTokenExpirationDate = new Date(localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN_EXPIRATION_DATE));
+
+    return spotifyToken && spotifyTokenExpirationDate && spotifyTokenExpirationDate > now;
+}
+
 class LoginComponent extends Component {
 
     static propTypes = {
@@ -39,8 +47,7 @@ class LoginComponent extends Component {
         const getterParams = extractGetters(location.search.substring(1));
         if (getterParams.code) spotifyGetToken(getterParams.code, showError);
 
-        const isLoggedIn = localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN);
-        if (isLoggedIn) history.push('/');
+        if (isLoggedIn()) history.push('/');
     }
 
     render() {
