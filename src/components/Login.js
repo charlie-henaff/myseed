@@ -10,22 +10,11 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import { layoutStates } from '../redux/reducers/layout';
-import { APP_CONST } from "../index";
 import { snackBarSeverity, snackBarState } from "../redux/reducers/layout/snackBar";
 import bgImg from '../assets/img/woman_looking_through_records_at_vinyl_shop.jpg';
 import store from '../redux/store';
 import history from '../history';
-
-const spotify_client_scopes = 'user-read-email user-read-private user-library-read user-follow-read user-top-read user-read-recently-played';
-const spotify_login_callback = process.env.REACT_APP_BASE_URL + '/login';
-
-export function isLoggedIn() {
-    const now = new Date();
-    const spotifyToken = localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN);
-    const spotifyTokenExpirationDate = new Date(localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN_EXPIRATION_DATE));
-
-    return spotifyToken && spotifyTokenExpirationDate && spotifyTokenExpirationDate > now;
-}
+import * as LoginService from '../services/LoginService';
 
 class LoginComponent extends Component {
 
@@ -37,17 +26,17 @@ class LoginComponent extends Component {
     };
 
     componentDidMount() {
-        const { location, showError } = this.props;
+        const { location } = this.props;
         store.dispatch({ type: layoutStates.VISIBLE, visible: false });
         store.dispatch({ type: layoutStates.FULL_SIZE_CONTENT, fullSizeContent: true });
 
         const { retry } = this.props;
-        if (retry) spotifyAuthorize();
+        if (retry) LoginService.redirectToSpotifyAuth();
 
         const getterParams = extractGetters(location.search.substring(1));
-        if (getterParams.code) spotifyGetToken(getterParams.code, showError);
+        if (getterParams.code) LoginService.spotifyGetToken(getterParams.code).then(() => history.push('/'));
 
-        if (isLoggedIn()) history.push('/');
+        if (LoginService.logged()) history.push('/');
     }
 
     render() {
@@ -63,7 +52,7 @@ class LoginComponent extends Component {
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={spotifyAuthorize} color="primary">Se connecter</Button>
+                        <Button onClick={LoginService.redirectToSpotifyAuth} color="primary">Se connecter</Button>
                     </DialogActions>
                 </Dialog>
             </Container>
@@ -80,35 +69,6 @@ const extractGetters = (getterString) => {
             }
             return initial;
         }, {});
-};
-
-const spotifyAuthorize = () => {
-    window.location = 'https://accounts.spotify.com/authorize' +
-        '?response_type=code' +
-        '&client_id=' + process.env.REACT_APP_SPOTIFY_CLIENT_ID +
-        '&scope=' + encodeURIComponent(spotify_client_scopes) +
-        '&redirect_uri=' + encodeURIComponent(spotify_login_callback);
-};
-
-const spotifyGetToken = (code, showError) => {
-
-    const header = {
-        'Authorization': `Basic ${btoa(`${process.env.REACT_APP_SPOTIFY_CLIENT_ID}:${process.env.REACT_APP_SPOTIFY_CLIENT_SECRET}`)}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
-    }
-
-    const body = `grant_type=authorization_code&code=${code}&redirect_uri=${encodeURIComponent(spotify_login_callback)}`;
-
-    fetch('https://accounts.spotify.com/api/token', { method: 'post', headers: header, body: body })
-        .then(response => response.json())
-        .then(data => {
-            const expirationDate = new Date();
-            expirationDate.setSeconds(expirationDate.getSeconds() + data.expires_in);
-            localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN, data.access_token);
-            localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN_EXPIRATION_DATE, expirationDate);
-            localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_REFRESH_TOKEN, data.refresh_token);
-            history.push('/');
-        });
 };
 
 const styles = theme => ({
