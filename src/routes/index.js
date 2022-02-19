@@ -4,7 +4,7 @@ import React from 'react';
 import Login from '../components/Login';
 import Home from '../components/Home';
 import SearchResult from '../components/Search';
-import {logged} from '../services/LoginService';
+import {logged} from '../services/LoginServices';
 
 function LoginCheckedRoute({ component: Component, authed, ...rest }) {
   return (

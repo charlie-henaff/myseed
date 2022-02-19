@@ -14,7 +14,8 @@ import { snackBarSeverity, snackBarState } from "../redux/reducers/layout/snackB
 import bgImg from '../assets/img/woman_looking_through_records_at_vinyl_shop.jpg';
 import store from '../redux/store';
 import history from '../history';
-import * as LoginService from '../services/LoginService';
+import * as SpotifyServices from '../services/SpotifyServices';
+import { logged } from '../services/LoginServices';
 
 class LoginComponent extends Component {
 
@@ -31,12 +32,12 @@ class LoginComponent extends Component {
         store.dispatch({ type: layoutStates.FULL_SIZE_CONTENT, fullSizeContent: true });
 
         const { retry } = this.props;
-        if (retry) LoginService.redirectToSpotifyAuth();
+        if (retry) SpotifyServices.auth();
 
         const getterParams = extractGetters(location.search.substring(1));
-        if (getterParams.code) LoginService.spotifyGetToken(getterParams.code).then(() => history.push('/'));
+        if (getterParams.code) SpotifyServices.getToken(getterParams.code).then(() => history.push('/'));
 
-        if (LoginService.logged()) history.push('/');
+        if (logged()) history.push('/');
     }
 
     render() {
@@ -52,7 +53,7 @@ class LoginComponent extends Component {
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={LoginService.redirectToSpotifyAuth} color="primary">Se connecter</Button>
+                        <Button onClick={SpotifyServices.auth} color="primary">Se connecter</Button>
                     </DialogActions>
                 </Dialog>
             </Container>
