@@ -11,7 +11,7 @@ import Typography from "@mui/material/Typography";
 import Artist from "./Util/Card/Artist";
 import store from "../redux/store";
 import history from '../history';
-import { fetch as spotifyFetch } from '../utils/spotifyApi';
+import { fetch as spotifyFetch } from '../services/SpotifyServices';
 
 class Search extends Component {
 

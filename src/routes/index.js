@@ -4,13 +4,13 @@ import React from 'react';
 import Login from '../components/Login';
 import Home from '../components/Home';
 import SearchResult from '../components/Search';
-import {isLoggedIn} from '../components/Login';
+import {logged} from '../services/LoginServices';
 
 function LoginCheckedRoute({ component: Component, authed, ...rest }) {
   return (
     <Route
       {...rest}
-      render={(props) => isLoggedIn()
+      render={(props) => logged()
         ? <Component {...props} />
         : <Redirect to={{ pathname: '/login', state: { from: props.location } }} />}
     />
