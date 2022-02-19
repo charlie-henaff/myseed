@@ -11,9 +11,9 @@ import { withStyles } from '@mui/styles';
 import {HomeRounded as HomeIcon} from '@mui/icons-material';
 import {connect} from 'react-redux';
 import {drawerStates} from '../../redux/reducers/layout/drawer';
-import {APP_CONST} from '../../index';
 import PropTypes from 'prop-types';
 import history from '../../history';
+import { logout } from '../../services/LoginServices';
 
 class Drawer extends Component {
 
@@ -32,7 +32,7 @@ class Drawer extends Component {
     };
 
     const disconect = () => {
-      localStorage.removeItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN);
+      logout();
       changeDestination('/login');
     };
 

@@ -71,6 +71,5 @@ export const refreshToken = () => {
           expirationDate.setSeconds(expirationDate.getSeconds() + data.expires_in);
           localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN, data.access_token);
           localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN_EXPIRATION_DATE, expirationDate);
-          localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_REFRESH_TOKEN, data.refresh_token);
       });
 };

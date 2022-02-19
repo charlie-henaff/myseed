@@ -16,6 +16,7 @@ import store from '../redux/store';
 import history from '../history';
 import * as SpotifyServices from '../services/SpotifyServices';
 import { logged } from '../services/LoginServices';
+import { APP_CONST } from '..';
 
 class LoginComponent extends Component {
 
@@ -35,9 +36,10 @@ class LoginComponent extends Component {
         if (retry) SpotifyServices.auth();
 
         const getterParams = extractGetters(location.search.substring(1));
-        if (getterParams.code) SpotifyServices.getToken(getterParams.code).then(() => history.push('/'));
 
         if (logged()) history.push('/');
+        else if (getterParams.code) SpotifyServices.getToken(getterParams.code).then(() => history.push('/'));
+        else if (localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_REFRESH_TOKEN)) SpotifyServices.refreshToken().then(() => history.push(location.state.from.pathname || '/'));
     }
 
     render() {
