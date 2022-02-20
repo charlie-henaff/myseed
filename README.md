@@ -1,5 +1,9 @@
 ![License](https://img.shields.io/github/license/charlie-henaff/myseed)
 
+>**Spotify public user**  
+>email : &emsp;&emsp;&emsp;&nbsp; myseed@yopmail.com   
+>password : &emsp;&ensp; myseedpwd
+
 # MySeed 
 
 <!-- >**MySeed, grow your discoveries** *a personal media hub*   -->
