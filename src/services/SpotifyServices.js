@@ -31,7 +31,8 @@ export const auth = () => {
       '?response_type=code' +
       '&client_id=' + process.env.REACT_APP_SPOTIFY_CLIENT_ID +
       '&scope=' + encodeURIComponent(spotify_client_scopes) +
-      '&redirect_uri=' + encodeURIComponent(spotify_login_callback);
+      '&redirect_uri=' + encodeURIComponent(spotify_login_callback) +
+      '&show_dialog=true';
 };
 
 export const getToken = (code) => {
