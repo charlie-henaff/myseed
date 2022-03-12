@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { APP_CONST } from '../../constants';
 import { layoutStates } from "../../redux/reducers/layout";
-import { Box } from '@mui/system';
 import store from '../../redux/store';
 import history from '../../history';
 import { Container, LinearProgress } from '@mui/material';
