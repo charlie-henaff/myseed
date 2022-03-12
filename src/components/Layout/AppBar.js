@@ -3,7 +3,7 @@ import { withStyles } from '@mui/styles';
 import MaterialAppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
-import { SearchRounded as SearchIcon } from '@mui/icons-material';
+import { SearchOff, SearchRounded as SearchIcon } from '@mui/icons-material';
 import InputBase from '@mui/material/InputBase';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
@@ -25,8 +25,15 @@ class AppBar extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      searchInput: props.searchValue,
+      searchInput: this.filterKeySearch(props.searchValue),
       searchTimeout: null
+    }
+  }
+
+  filterKeySearch = searchTxt => {
+    switch (searchTxt) {
+      case 'my_favorites': return null;
+      default: return searchTxt
     }
   }
 

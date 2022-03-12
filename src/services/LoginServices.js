@@ -1,4 +1,4 @@
-import { APP_CONST } from "..";
+import { APP_CONST } from "../constants";
 
 export const logged = () => {
     const now = new Date();
