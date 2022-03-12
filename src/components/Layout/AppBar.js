@@ -22,12 +22,34 @@ class AppBar extends Component {
     dispatchSearch: PropTypes.func.isRequired,
   }
 
-  render() {
-    const { classes, searchValue, toggleDrawer, dispatchSearch } = this.props;
-    const search = txt => {
-      history.push((txt.length > 0) ? '/search/' + txt : '/');
-      dispatchSearch(txt)
+  constructor(props) {
+    super(props);
+    this.state = {
+      searchInput: props.searchValue,
+      searchTimeout: null
     }
+  }
+
+  getSearchTimeout = () => setTimeout(() => {
+    const { dispatchSearch } = this.props;
+    const { searchInput } = this.state;
+    history.push((searchInput.length > 0) ? '/search/' + searchInput : '/');
+    dispatchSearch(searchInput);
+  }, 500);
+
+  search = txt => {
+    const { searchTimeout } = this.state;
+    if (searchTimeout != null) clearTimeout(searchTimeout)
+    this.setState({
+      searchInput: txt,
+      searchTimeout: this.getSearchTimeout()
+    });
+  }
+
+  render() {
+    const { classes, toggleDrawer } = this.props;
+    const { searchInput } = this.state;
+
     return (
       <div>
         <MaterialAppBar color="primary" elevation={0} position="fixed" className={classes.root} >
@@ -47,11 +69,11 @@ class AppBar extends Component {
               <InputBase
                 placeholder="Rechercher..."
                 className={classes.searchInput}
-                value={searchValue && searchValue}
+                value={searchInput && searchInput}
                 inputProps={{ 'aria-label': 'search' }}
-                onChange={(event) => search(event.target.value)}
+                onChange={(event) => this.search(event.target.value)}
                 onKeyDown={(event) => {
-                  if (event.key === "Enter") search(event.target.value);
+                  if (event.key === "Enter") this.search(event.target.value);
                 }}
               />
             </div>

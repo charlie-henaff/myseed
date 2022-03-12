@@ -136,4 +136,4 @@ const mapDispatchToProps = dispatch => ({
     requestSeach: txt => actionSeach(dispatch, txt)
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Search));
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Search)); 
