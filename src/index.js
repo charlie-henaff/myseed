@@ -14,14 +14,6 @@ import LayoutComponent from './components/Layout/Layout';
 import store from './redux/store';
 import { ConnectedRouter } from 'connected-react-router';
 
-export const APP_CONST = {
-    LOCAL_STORAGE: {
-        SPOTIFY_TOKEN: 'APP_CONST_LOCAL_STORAGE_SPOTIFY_TOKEN',
-        SPOTIFY_TOKEN_EXPIRATION_DATE: 'SPOTIFY_TOKEN_EXPIRATION_DATE',
-        SPOTIFY_REFRESH_TOKEN: 'APP_CONST_LOCAL_STORAGE_SPOTIFY_REFRESH_TOKEN',
-    },
-};
-
 ReactDOM.render(
     <Provider store={store}>
         <ConnectedRouter history={history}>

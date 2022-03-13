@@ -5,6 +5,7 @@ import Login from '../components/Login';
 import Home from '../components/Home';
 import SearchResult from '../components/Search';
 import {logged} from '../services/LoginServices';
+import MusicPlaylist from '../components/Music/MusicPlaylist';
 
 function LoginCheckedRoute({ component: Component, authed, ...rest }) {
   return (
@@ -21,5 +22,6 @@ function LoginCheckedRoute({ component: Component, authed, ...rest }) {
 export default [
   <Route path="/login" key="route_login" component={Login} />,
   <LoginCheckedRoute path="/" key="route_home" exact component={Home} />,
-  <LoginCheckedRoute path="/search" key="route_search" component={SearchResult} />
+  <LoginCheckedRoute path="/search" key="route_search" component={SearchResult} />,
+  <LoginCheckedRoute path="/music/playlist" key="route_music_playlist" exact component={MusicPlaylist} />,
 ];

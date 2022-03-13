@@ -16,7 +16,7 @@ import store from '../redux/store';
 import history from '../history';
 import * as SpotifyServices from '../services/SpotifyServices';
 import { logged } from '../services/LoginServices';
-import { APP_CONST } from '..';
+import { APP_CONST } from '../constants';
 
 class LoginComponent extends Component {
 

@@ -1,21 +1,19 @@
 import React, {Component} from 'react';
 import { withStyles } from '@mui/styles';
 import {connect} from 'react-redux';
-import PropTypes from 'prop-types';
-import {APP_CONST} from '../index';
+import {APP_CONST} from '../constants';
 import {layoutStates} from "../redux/reducers/layout";
 import { Box } from '@mui/system';
 import store from '../redux/store';
 import history from '../history';
 class Home extends Component {
-  static propTypes = {
-    token: PropTypes.string,
-  };
 
   componentDidMount() {
     if (!localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN)) {
       history.push('/login');
     }
+
+    history.push('/music/playlist');
 
     store.dispatch({ type: layoutStates.VISIBLE, visible: true });
     store.dispatch({ type: layoutStates.FULL_SIZE_CONTENT, fullSizeContent: false });
@@ -35,8 +33,7 @@ const styles = (theme) => ({
 });
 
 const mapStateToProps = state => {
-  const token = state.app.token;
-  return {token};
+  return {};
 };
 
 const mapDispatchToProps = dispatch => ({

@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Box, Container, Grid, LinearProgress } from "@mui/material";
 import { withStyles } from '@mui/styles';
 import { layoutStates } from "../redux/reducers/layout";
-import { APP_CONST } from "../index";
+import { APP_CONST } from "../constants";
 import PropTypes from "prop-types";
 import { appBarStates } from "../redux/reducers/layout/appBar";
 import { searchStates } from "../redux/reducers/search"
@@ -11,7 +11,7 @@ import Typography from "@mui/material/Typography";
 import Artist from "./Util/Card/Artist";
 import store from "../redux/store";
 import history from '../history';
-import { fetch as spotifyFetch } from '../services/SpotifyServices';
+import { search } from "../services/SearchServices";
 
 class Search extends Component {
 
@@ -101,19 +101,8 @@ const styles = (theme) => {
 };
 
 const actionSeach = (dispatch, input) => {
-    const header = new Headers({
-        'Authorization': `Bearer ${localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN)}`,
-        'Content-Type': 'application/json'
-    });
-
-    const params = [
-        `q=${input}`,
-        "type=album,artist,track",
-        "limit=6"
-    ];
-
     dispatch({ type: searchStates.LOADING, loading: true });
-    spotifyFetch(`${process.env.REACT_APP_SPOTIFY_API_ENDPOINT}/search?${params.join('&')}`, { method: 'get', headers: header })
+    search(input)
         .then(result => dispatch({ type: searchStates.RESULT, result: result }))
         .finally(() => dispatch({ type: searchStates.LOADING, loading: false }))
         .catch(error => {
