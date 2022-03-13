@@ -1,15 +1,15 @@
-import React, { Component } from 'react';
-import { withStyles } from '@mui/styles';
-import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
-import { APP_CONST } from '../../constants';
-import { layoutStates } from "../../redux/reducers/layout";
-import store from '../../redux/store';
-import history from '../../history';
 import { Container, Grid, LinearProgress, Typography } from '@mui/material';
-import { musicPlaylistStates } from '../../redux/reducers/music/playlist';
-import { topsRecommendations } from '../../services/music/MusicPlaylistServices';
+import { withStyles } from '@mui/styles';
 import { Box } from '@mui/system';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { APP_CONST } from '../../constants';
+import history from '../../history';
+import { layoutStates } from "../../redux/reducers/layout";
+import { musicPlaylistStates } from '../../redux/reducers/music/playlist';
+import store from '../../redux/store';
+import { topsRecommendations } from '../../services/music/MusicPlaylistServices';
 import Artist from '../Util/Card/Artist';
 
 
