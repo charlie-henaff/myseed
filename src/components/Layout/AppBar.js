@@ -3,7 +3,7 @@ import { withStyles } from '@mui/styles';
 import MaterialAppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
-import { SearchOff, SearchRounded as SearchIcon } from '@mui/icons-material';
+import { SearchRounded as SearchIcon } from '@mui/icons-material';
 import InputBase from '@mui/material/InputBase';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
