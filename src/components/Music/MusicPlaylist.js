@@ -6,14 +6,18 @@ import { APP_CONST } from '../../constants';
 import { layoutStates } from "../../redux/reducers/layout";
 import store from '../../redux/store';
 import history from '../../history';
-import { Container, LinearProgress } from '@mui/material';
+import { Container, Grid, LinearProgress, Typography } from '@mui/material';
 import { musicPlaylistStates } from '../../redux/reducers/music/playlist';
+import { topsRecommendations } from '../../services/music/MusicPlaylistServices';
+import { Box } from '@mui/system';
+import Artist from '../Util/Card/Artist';
 
 
 class MusicPlaylist extends Component {
 
   static propTypes = {
-    playlistLoading: PropTypes.bool.isRequired,
+    playlistLoading: PropTypes.bool,
+    tracks: PropTypes.array,
   };
 
   componentDidMount() {
@@ -23,26 +27,27 @@ class MusicPlaylist extends Component {
 
     store.dispatch({ type: layoutStates.VISIBLE, visible: true });
     store.dispatch({ type: layoutStates.FULL_SIZE_CONTENT, fullSizeContent: false });
-    store.dispatch({ type: musicPlaylistStates.LOADING, loading: true });
+
+    getTopRecomendations()
   }
 
   render() {
-    const { playlistLoading } = this.props;
+    const { playlistLoading, tracks } = this.props;
 
     return (
       <>
         {playlistLoading && <LinearProgress color="secondary" />}
         <Container maxWidth={'xl'}>
-          {/* {!tracks ? "" : (
+          {!tracks ? "" : (
             <Box py={2}>
-              <Typography variant="h6" gutterBottom>Musiques</Typography>
+              <Typography variant="h6" gutterBottom>My playlist</Typography>
               <Grid container spacing={2}>
                 {tracks.map(item => {
                   return <Artist name={item.name} avatarUrl={item.album?.images?.pop()?.url} key={"artist_" + item.id} />
                 })}
               </Grid>
             </Box>
-          )} */}
+          )}
         </Container>
       </>
     );
@@ -53,11 +58,23 @@ const styles = (theme) => ({
 
 });
 
+const getTopRecomendations = () => {
+  store.dispatch({ type: musicPlaylistStates.LOADING, loading: true });
+  topsRecommendations()
+    .then(result => store.dispatch({ type: musicPlaylistStates.RESULT, result: result.tracks }))
+    .finally(() => store.dispatch({ type: musicPlaylistStates.LOADING, loading: false }))
+    .catch(error => {
+      if (error.message) {
+        store.dispatch({ type: musicPlaylistStates.ERROR, error: (error.message || "Une erreur est survenue.") });
+      }
+    });;
+};
+
 const mapStateToProps = state => {
   const playlistLoading = state.app.music.playlist.loading;
-  const playlistResult = state.app.music.playlist.result;
+  const tracks = state.app.music.playlist.result;
   const playlistError = state.app.music.playlist.error;
-  return { playlistLoading, playlistResult, playlistError };
+  return { playlistLoading, tracks, playlistError };
 };
 
 const mapDispatchToProps = dispatch => ({

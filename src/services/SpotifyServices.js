@@ -5,6 +5,12 @@ const spotify_login_callback = process.env.REACT_APP_BASE_URL + '/login';
 
 export const fetch = (uri, options = {}) => {
   if ('undefined' === typeof options.headers) options.headers = new Headers();
+
+
+  if (null === options.headers.get('Authorization') && localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN)) {
+    options.headers.set('Authorization', `Bearer ${localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN)}`);
+  }
+
   if (null === options.headers.get('Accept')) {
     options.headers.set('Accept', 'application/json');
   }
@@ -17,7 +23,7 @@ export const fetch = (uri, options = {}) => {
     options.headers.set('Content-Type', 'MIME_TYPE');
   }
 
-  return global.fetch(new URL(uri, process.env.REACT_APP_SPOTIFY_API_ENDPOINT), options)
+  return global.fetch(new URL(process.env.REACT_APP_SPOTIFY_API_ENDPOINT + uri), options)
     .then(response => {
       if (response.ok) return response.json();
       return response.json()
