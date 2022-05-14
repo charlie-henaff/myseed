@@ -1,31 +1,38 @@
-import React, {Component} from 'react';
-import {connect} from 'react-redux';
+import { withStyles } from '@mui/styles';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { Switch } from 'react-router-dom';
+import SpotifyWebPlayer from 'react-spotify-web-playback/lib';
+import { APP_CONST } from '../../constants';
+import routes from './../../routes';
 import AppBar from './AppBar';
 import Drawer from './Drawer';
-import PropTypes from 'prop-types';
 import SnackBar from "./SnackBar";
-import routes from './../../routes';
-import {Switch} from 'react-router-dom';
-import { withStyles } from '@mui/styles';
 
 class Layout extends Component {
 
     static propTypes = {
         layoutVisible: PropTypes.bool.isRequired,
+        spotifyPlayerActive: PropTypes.bool.isRequired
     };
 
     render() {
-        const {layoutVisible} = this.props;
+        const { layoutVisible , spotifyPlayerActive} = this.props;
         return (
             <>
-                <SnackBar/>
+                <SnackBar />
                 {layoutVisible && (
                     <div>
-                        <AppBar/>
-                        <Drawer/>
+                        <AppBar />
+                        <Drawer />
                     </div>
                 )}
                 <Switch>{routes}</Switch>
+                {spotifyPlayerActive && (
+                    <SpotifyWebPlayer
+                        token={localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN)}
+                        uris={['spotify:artist:6HQYnRM4OzToCYPpVBInuU']} />)}
             </>
         );
     }
@@ -37,7 +44,8 @@ const styles = () => ({
 
 const mapStateToProps = state => {
     const layoutVisible = state.app.layout.visible;
-    return {layoutVisible};
+    const spotifyPlayerActive = state.app.layout.spotifyPlayerActive
+    return { layoutVisible, spotifyPlayerActive };
 };
 
 export default connect(mapStateToProps, null)(withStyles(styles)(Layout));
