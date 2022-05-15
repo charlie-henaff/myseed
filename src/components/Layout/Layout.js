@@ -14,38 +14,68 @@ class Layout extends Component {
 
     static propTypes = {
         layoutVisible: PropTypes.bool.isRequired,
-        spotifyPlayerActive: PropTypes.bool.isRequired
+        spotifyPlayerVisible: PropTypes.bool.isRequired,
+        spotfyPlayerUris: PropTypes.array
     };
 
     render() {
-        const { layoutVisible , spotifyPlayerActive} = this.props;
+        const { classes, layoutVisible, spotifyPlayerVisible, spotfyPlayerUris } = this.props;
         return (
             <>
                 <SnackBar />
                 {layoutVisible && (
-                    <div>
+                    <section>
                         <AppBar />
                         <Drawer />
-                    </div>
+                    </section>
                 )}
-                <Switch>{routes}</Switch>
-                {spotifyPlayerActive && (
-                    <SpotifyWebPlayer
-                        token={localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN)}
-                        uris={['spotify:artist:6HQYnRM4OzToCYPpVBInuU']} />)}
+                <section className={classes.content} style={{ height: (spotifyPlayerVisible ? '85VH' : '100VH') }}>
+                    <Switch>{routes}</Switch>
+                </section>
+                <section className={classes.footer} style={{ height: (spotifyPlayerVisible ? '15VH' : '0VH') }} >
+                    {spotifyPlayerVisible && (
+                        <SpotifyWebPlayer
+                            name="mySeed"
+                            token={localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN)}
+                            uris={spotfyPlayerUris}
+                            play={true}
+                            showSaveIcon={true}
+                            persistDeviceSelection={false}
+                            className={classes.spotifyPlayer}
+                            styles={{
+                                activeColor: '#fff',
+                                bgColor: '#1976d2',
+                                color: '#fff',
+                                loaderColor: '#fff',
+                                sliderColor: '#e91e63',
+                                sliderHeight: 8,
+                                sliderHandleColor: '#e91e63',
+                                trackArtistColor: '#ccc',
+                                trackNameColor: '#fff',
+                            }} />)}
+                </section>
             </>
         );
     }
 }
 
-const styles = () => ({
-
+const styles = (theme) => ({
+    content: {
+        overflow: 'scroll'
+    },
+    footer: {
+        backgroundColor: '#1976d2',
+    },
+    spotifyPlayer: {
+        height: '100VH',
+    }
 });
 
 const mapStateToProps = state => {
     const layoutVisible = state.app.layout.visible;
-    const spotifyPlayerActive = state.app.layout.spotifyPlayerActive
-    return { layoutVisible, spotifyPlayerActive };
+    const spotifyPlayerVisible = state.app.layout.spotifyPlayer.visible;
+    const spotfyPlayerUris = state.app.layout.spotifyPlayer.uris;
+    return { layoutVisible, spotifyPlayerVisible, spotfyPlayerUris };
 };
 
 export default connect(mapStateToProps, null)(withStyles(styles)(Layout));

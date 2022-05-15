@@ -2,6 +2,7 @@ import { combineReducers } from 'redux';
 import appBar from './appBar';
 import drawer from './drawer';
 import snackBar from "./snackBar";
+import spotifyPlayer from './spotifyPlayer';
 
 export const layoutStates = {
   VISIBLE: 'LAYOUT_VISIBLE_STATE',
@@ -27,13 +28,4 @@ export function fullSizeContent(state = true, action) {
   }
 }
 
-export function spotifyPlayerActive(state = false, action) {
-  switch (action.type) {
-    case layoutStates.SPOTIFY_PLAYER_ACTIVE:
-      return action.spotifyPlayerActive;
-    default:
-      return state;
-  }
-}
-
-export default combineReducers({ visible, fullSizeContent, spotifyPlayerActive, appBar, drawer, snackBar });
+export default combineReducers({ visible, fullSizeContent, appBar, drawer, snackBar, spotifyPlayer });
