@@ -61,7 +61,7 @@ class Layout extends Component {
 
 const styles = (theme) => ({
     content: {
-        overflow: 'scroll'
+        overflowY: 'scroll'
     },
     footer: {
         backgroundColor: '#1976d2',
