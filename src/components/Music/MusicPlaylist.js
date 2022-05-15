@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 import { APP_CONST } from '../../constants';
 import history from '../../history';
 import { layoutStates } from "../../redux/reducers/layout";
+import { spotifyPlayerState } from '../../redux/reducers/layout/spotifyPlayer';
 import { musicPlaylistStates } from '../../redux/reducers/music/playlist';
 import store from '../../redux/store';
 import { topsRecommendations } from '../../services/music/MusicPlaylistServices';
@@ -20,6 +21,10 @@ class MusicPlaylist extends Component {
     tracks: PropTypes.array,
   };
 
+  state = { 
+    lastTracks: null 
+  };
+
   componentDidMount() {
     if (!localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN)) {
       history.push('/login');
@@ -28,7 +33,18 @@ class MusicPlaylist extends Component {
     store.dispatch({ type: layoutStates.VISIBLE, visible: true });
     store.dispatch({ type: layoutStates.FULL_SIZE_CONTENT, fullSizeContent: false });
 
-    getTopRecomendations()
+    const { tracks } = this.props;
+    if (!tracks) {
+      getTopRecomendations()
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const { tracks } = this.props;
+    if (tracks !== prevProps.tracks) {
+      store.dispatch({ type: spotifyPlayerState.VISIBLE, visible: true });
+      store.dispatch({ type: spotifyPlayerState.URIS, uris: tracks.map(track => track.uri) });
+    }
   }
 
   render() {

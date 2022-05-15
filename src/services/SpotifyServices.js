@@ -1,6 +1,6 @@
 import { APP_CONST } from "../constants";
 
-const spotify_client_scopes = 'user-read-email user-read-private user-library-read user-follow-read user-top-read user-read-recently-played';
+const spotify_client_scopes = 'streaming user-read-email user-read-private user-library-read user-library-modify user-top-read user-read-playback-state user-modify-playback-state';
 const spotify_login_callback = process.env.REACT_APP_BASE_URL + '/login';
 
 export const fetch = (uri, options = {}) => {

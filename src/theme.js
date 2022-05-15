@@ -23,7 +23,7 @@ export default createTheme({
   },
   overrides: {
     body: {
-      margin: 0,
+      margin: 0
     },
   },
 });
