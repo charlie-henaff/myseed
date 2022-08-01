@@ -3,8 +3,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Switch } from 'react-router-dom';
-import SpotifyWebPlayer from 'react-spotify-web-playback/lib';
-import { APP_CONST } from '../../constants';
 import routes from './../../routes';
 import AppBar from './AppBar';
 import Drawer from './Drawer';
@@ -29,10 +27,9 @@ class Layout extends Component {
                         <Drawer />
                     </section>
                 )}
-                <section className={classes.content} style={{ height: (spotifyPlayerVisible ? '85VH' : '100VH') }}>
-                    <Switch>{routes}</Switch>
-                </section>
-                <section className={classes.footer} style={{ height: (spotifyPlayerVisible ? '15VH' : '0VH') }} >
+                <Switch>{routes}</Switch>
+                {/* <section className={classes.content} style={{ height: (spotifyPlayerVisible ? '85VH' : '100VH') }}></section> */}
+                {/* <section className={classes.footer} style={{ height: (spotifyPlayerVisible ? '15VH' : '0VH') }} >
                     {spotifyPlayerVisible && (
                         <SpotifyWebPlayer
                             name="mySeed"
@@ -53,7 +50,7 @@ class Layout extends Component {
                                 trackArtistColor: '#ccc',
                                 trackNameColor: '#fff',
                             }} />)}
-                </section>
+                </section> */}
             </>
         );
     }

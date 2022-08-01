@@ -1,25 +1,27 @@
-import React, { Component } from 'react';
-import { withStyles } from '@mui/styles';
-import MaterialAppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import Box from '@mui/material/Box';
 import { SearchRounded as SearchIcon } from '@mui/icons-material';
-import InputBase from '@mui/material/InputBase';
-import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
-import { drawerStates } from '../../redux/reducers/layout/drawer';
-import { appBarStates } from "../../redux/reducers/layout/appBar";
-import history from "../../history";
+import { Typography } from '@mui/material';
+import MaterialAppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
+import InputBase from '@mui/material/InputBase';
+import Toolbar from '@mui/material/Toolbar';
+import { withStyles } from '@mui/styles';
 import { alpha } from '@mui/system';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import history from "../../history";
+import { appBarStates } from "../../redux/reducers/layout/appBar";
+import { drawerStates } from '../../redux/reducers/layout/drawer';
 
 class AppBar extends Component {
 
   static propTypes = {
     searchValue: PropTypes.string,
+    title: PropTypes.string,
     toggleDrawer: PropTypes.func.isRequired,
-    dispatchSearch: PropTypes.func.isRequired,
+    dispatchSearch: PropTypes.func.isRequired
   }
 
   constructor(props) {
@@ -54,7 +56,7 @@ class AppBar extends Component {
   }
 
   render() {
-    const { classes, toggleDrawer } = this.props;
+    const { classes, toggleDrawer, title } = this.props;
     const { searchInput } = this.state;
 
     return (
@@ -68,7 +70,9 @@ class AppBar extends Component {
               onClick={() => toggleDrawer(true)}>
               <MenuIcon />
             </IconButton>
-            <Box className={classes.title} />
+            <Box className={classes.title} >
+              <Typography>{title}</Typography>
+            </Box>
             <div className={classes.search}>
               <div className={classes.searchIcon}>
                 <SearchIcon />
@@ -94,7 +98,13 @@ class AppBar extends Component {
 
 const styles = theme => ({
   root: { flexGrow: 1 },
-  title: { flexGrow: 1 },
+  title: {
+    flexGrow: 1,
+    paddingLeft: 16,
+    [theme.breakpoints.down('sm')]: {
+      display: 'none',
+    },
+  },
   search: {
     position: 'relative',
     borderRadius: theme.shape.borderRadius,
@@ -138,7 +148,8 @@ const styles = theme => ({
 
 const mapStateToProps = state => {
   const searchValue = state.app.layout.appBar.search;
-  return { searchValue };
+  const title = state.app.layout.appBar.title;
+  return { searchValue, title };
 };
 
 const mapDispatchToProps = dispatch => ({

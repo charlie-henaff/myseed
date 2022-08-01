@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux';
 
-export const musicPlaylistStates = {
+export const playlistStates = {
   LOADING: 'MUSIC_PLAYLIST_LOADING',
   RESULT: 'MUSIC_PLAYLIST_RESULT',
   ERROR: 'MUSIC_PLAYLIST_ERROR'
@@ -8,7 +8,7 @@ export const musicPlaylistStates = {
 
 export function loading(state = null, action) {
   switch (action.type) {
-    case musicPlaylistStates.LOADING:
+    case playlistStates.LOADING:
       return action.loading;
     default:
       return state;
@@ -17,7 +17,7 @@ export function loading(state = null, action) {
 
 export function result(state = null, action) {
   switch (action.type) {
-    case musicPlaylistStates.RESULT:
+    case playlistStates.RESULT:
       return action.result;
     default:
       return state;
@@ -26,7 +26,7 @@ export function result(state = null, action) {
 
 export function error(state = null, action) {
   switch (action.type) {
-    case musicPlaylistStates.ERROR:
+    case playlistStates.ERROR:
       return action.error;
     default:
       return state;
