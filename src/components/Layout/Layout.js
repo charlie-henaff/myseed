@@ -31,8 +31,8 @@ class Layout extends Component {
                 )}
 
                 <section>
-                    <div className={classes.content} style={{ height: (showPlayer ? '86vh' : '100vh') }}><Switch>{routes}</Switch></div>
-                    {showPlayer && <div style={{ height: '14vh'}}><Player /></div>}
+                    <div className={classes.content} style={{ paddingBottom: (showPlayer ? '130px' : '0') }}><Switch>{routes}</Switch></div>
+                    {showPlayer && <Player />}
                 </section>
             </>
         );
@@ -41,6 +41,7 @@ class Layout extends Component {
 
 const styles = (theme) => ({
     content: {
+        height: '100vh',
         overflowY: 'auto'
     }
 });
