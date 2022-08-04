@@ -1,5 +1,5 @@
 import { ComputerRounded, FavoriteBorderRounded, KeyboardArrowUpRounded, PlayArrowRounded } from '@mui/icons-material';
-import { CardMedia, colors, IconButton, Typography } from '@mui/material';
+import { CardMedia, colors, IconButton, LinearProgress, Typography } from '@mui/material';
 import { withStyles } from '@mui/styles';
 import { Box } from '@mui/system';
 
@@ -26,6 +26,7 @@ class Player extends Component {
                             <Box className={classes.mediaData}>
                                 <Typography variant='body1'>Title</Typography>
                                 <Typography variant='caption'>Artist</Typography>
+                                <LinearProgress variant="determinate" value={50} color='secondary' sx={{ mt: 0.5, borderRadius: '20px' }} />
                             </Box>
                         </Box>
 
@@ -40,6 +41,7 @@ class Player extends Component {
                                 <PlayArrowRounded sx={{ color: 'white' }} />
                             </IconButton>
                         </Box>
+
                     </Box>
                 </Box>
             </Box>
@@ -95,7 +97,7 @@ const styles = (theme) => ({
         color: 'white',
         backgroundColor: 'rgba(0, 0, 0, 0.25)',
     },
-    mediaData:{
+    mediaData: {
         flex: 1,
         justifyContent: 'center',
         color: 'white',
