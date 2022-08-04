@@ -18,7 +18,7 @@ class Layout extends Component {
     };
 
     render() {
-        const { classes, layoutVisible, showPlayer} = this.props;
+        const { classes, layoutVisible, showPlayer } = this.props;
         return (
             <>
                 <SnackBar />
