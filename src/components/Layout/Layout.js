@@ -14,11 +14,11 @@ class Layout extends Component {
     static propTypes = {
         layoutVisible: PropTypes.bool.isRequired,
         showPlayer: PropTypes.bool.isRequired,
-        spotfyPlayerUris: PropTypes.array
+        // spotfyPlayerUris: PropTypes.array
     };
 
     render() {
-        const { classes, layoutVisible, showPlayer, spotfyPlayerUris } = this.props;
+        const { classes, layoutVisible, showPlayer} = this.props;
         return (
             <>
                 <SnackBar />
@@ -49,8 +49,8 @@ const styles = (theme) => ({
 const mapStateToProps = state => {
     const layoutVisible = state.app.layout.visible;
     const showPlayer = state.app.layout.spotifyPlayer.visible;
-    const spotfyPlayerUris = state.app.layout.spotifyPlayer.uris;
-    return { layoutVisible, showPlayer, spotfyPlayerUris };
+    // const spotfyPlayerUris = state.app.layout.spotifyPlayer.uris;
+    return { layoutVisible, showPlayer };
 };
 
 export default connect(mapStateToProps, null)(withStyles(styles)(Layout));
