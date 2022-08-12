@@ -25,7 +25,7 @@ export const fetch = (uri, options = {}) => {
 
   return global.fetch(new URL(process.env.REACT_APP_SPOTIFY_API_ENDPOINT + uri), options)
     .then(response => {
-      if (response.status == 204) return ''; 
+      if (response.status === 204) return ''; 
       if (response.ok) return response.json();
       return response.json()
         .then(
