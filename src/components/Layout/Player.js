@@ -1,50 +1,98 @@
-import { ComputerRounded, FavoriteBorderRounded, KeyboardArrowUpRounded, PlayArrowRounded } from '@mui/icons-material';
-import { CardMedia, colors, IconButton, LinearProgress, Typography } from '@mui/material';
+import { ComputerRounded, FavoriteBorderRounded, KeyboardArrowUpRounded, PauseRounded, PlayArrowRounded } from '@mui/icons-material';
+import { CardMedia, colors, IconButton, Slide, Slider, Typography } from '@mui/material';
 import { withStyles } from '@mui/styles';
 import { Box } from '@mui/system';
+import { connect } from 'react-redux';
+import { fetch as fetchSpotify } from '../../services/SpotifyServices';
 
 const { Component } = require("react");
 
 class Player extends Component {
 
+    state = {
+        isPlaying: false,
+        progressBarValue: 0,
+        progress: 0,
+        duration: 1,
+        title: '',
+        artist: '',
+        img: '',
+    }
+
+    intervalPlaybackState = null;
+
+    componentDidMount() {
+        this.intervalPlaybackState = setInterval(() => {
+            this.fetchPlaybackState();
+        }, 1000);
+    }
+
+    componentWillUnmount() {
+        if (this.intervalPlaybackState) clearInterval(this.intervalPlaybackState);
+    }
+
+    fetchPlaybackState() {
+        fetchSpotify('/me/player').then(playbackState => {
+            if (playbackState) {
+                this.setState({
+                    isPlaying: playbackState.is_playing,
+                    progress: playbackState.progress_ms,
+                    duration: playbackState.item.duration_ms,
+                    title: playbackState.item.name,
+                    artist: playbackState.item.artists.map(artist => artist.name).join(', '),
+                    img: playbackState.item.album.images[0].url
+                });
+            }
+        });
+    }
+
+    togglePlayPause() {
+        fetchSpotify('/me/player/' + (this.state.isPlaying ? 'pause' : 'play'), {method: 'PUT'});
+    }
 
     render() {
         const { classes } = this.props;
         return (
-            <Box className={classes.root}>
-                <Box className={classes.shape}>
-                    <Box className={classes.content}>
+            <Slide direction="up" in={this.state.title.length > 1} mountOnEnter unmountOnExit>
+                <Box className={classes.root}>
+                    <Box className={classes.shape}>
+                        <Box className={classes.content}>
 
-                        <Box className={classes.leftControls}>
-                            <CardMedia className={classes.albumCardMedia} image="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse4.mm.bing.net%2Fth%3Fid%3DOIP.xddyM5Z5llwe5nz0xAnhvAHaD_%26pid%3DApi&f=1">
-                                <Box className={classes.albumCardMediaControls}>
-                                    <IconButton className={classes.albumMediaCardBtn} size='small'>
-                                        <KeyboardArrowUpRounded sx={{ fontSize: '28px', color: 'white' }} />
-                                    </IconButton>
+                            <Box className={classes.leftControls}>
+                                <CardMedia className={classes.albumCardMedia} image={this.state.img}>
+                                    <Box className={classes.albumCardMediaControls}>
+                                        <IconButton className={classes.albumMediaCardBtn} size='small'>
+                                            <KeyboardArrowUpRounded sx={{ fontSize: '28px', color: 'white' }} />
+                                        </IconButton>
+                                    </Box>
+                                </CardMedia>
+                                <Box className={classes.mediaData}>
+                                    <Typography variant='body2' noWrap={true}>{this.state.title}</Typography>
+                                    <Typography variant='caption' noWrap={true}>{this.state.artist}</Typography>
+                                    <Slider size="small" value={this.state.progress} min={0} max={this.state.duration} color='secondary' sx={{ height: 4, padding: '0 !important' }} />
                                 </Box>
-                            </CardMedia>
-                            <Box className={classes.mediaData}>
-                                <Typography variant='body1'>Title</Typography>
-                                <Typography variant='caption'>Artist</Typography>
-                                <LinearProgress variant="determinate" value={50} color='secondary' sx={{ mt: 0.5, borderRadius: '20px' }} />
                             </Box>
-                        </Box>
 
-                        <Box className={classes.rightControls}>
-                            <IconButton size='small ' sx={{ color: 'white' }}>
-                                <ComputerRounded sx={{ color: 'white' }} />
-                            </IconButton>
-                            <IconButton size='small' sx={{ color: 'white' }} >
-                                <FavoriteBorderRounded sx={{ color: 'white' }} />
-                            </IconButton>
-                            <IconButton size='small' sx={{ color: 'white' }}>
-                                <PlayArrowRounded sx={{ color: 'white' }} />
-                            </IconButton>
-                        </Box>
+                            <Box className={classes.rightControls}>
+                                <IconButton size='small ' sx={{ color: 'white' }}>
+                                    <ComputerRounded sx={{ color: 'white' }} />
+                                </IconButton>
+                                <IconButton size='small' sx={{ color: 'white' }} >
+                                    <FavoriteBorderRounded sx={{ color: 'white' }} />
+                                </IconButton>
+                                <IconButton size='small' sx={{ color: 'white' }} onClick={() => this.togglePlayPause()}>
+                                    {this.state.isPlaying
+                                        ? <PauseRounded sx={{ color: 'white' }} />
+                                        : <PlayArrowRounded sx={{ color: 'white' }} />
+                                    }
 
+                                </IconButton>
+                            </Box>
+
+                        </Box>
                     </Box>
                 </Box>
-            </Box>
+            </Slide>
         );
     }
 }
@@ -77,7 +125,7 @@ const styles = (theme) => ({
     },
     albumCardMedia: {
         borderRadius: '15px 15px 0 15px',
-        height: '72px',
+        height: '84px',
         width: '10vh',
     },
     albumCardMediaOverlay: {
@@ -114,4 +162,18 @@ const styles = (theme) => ({
 
 });
 
-export default withStyles(styles)(Player);
+const mapStateToProps = state => {
+    // const severity = state.app.layout.snackBar.severity;
+    // const message = state.app.layout.snackBar.message;
+    // const isOpen = state.app.layout.snackBar.isOpen;
+    // return { severity, message, isOpen };
+
+    return {};
+};
+
+const mapDispatchToProps = dispatch => ({
+    // close: () => dispatch({ type: snackBarState.isOpen, isOpen: false })
+    // getPlaybaCKState() => dispatch({type: playerState.plac})
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Player));
