@@ -31,7 +31,7 @@ class Layout extends Component {
                 )}
 
                 <section>
-                    <div className={classes.content} style={{ paddingBottom: (showPlayer ? '130px' : '0') }}><Switch>{routes}</Switch></div>
+                    <div className={classes.content} style={{ paddingBottom: (showPlayer ? '146px' : '0') }}><Switch>{routes}</Switch></div>
                     {showPlayer && <Player />}
                 </section>
             </>

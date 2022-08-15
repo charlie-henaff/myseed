@@ -18,6 +18,7 @@ class Player extends Component {
         title: '',
         artist: '',
         img: '',
+        lastPlayedItem: { contextUri: null }
     }
 
     player = new Promise(resolve => {
@@ -37,7 +38,7 @@ class Player extends Component {
                         fetchSpotify('/me/player').then(playbackState => {
                             if (!playbackState) {
                                 console.log('fetch playback here');
-                                fetchSpotify('/me/player', { method: 'PUT', body: JSON.stringify({ device_ids: [device_id] }) });
+                                this.initPlayerIfNotCurrentlyPlaying(device_id);
                                 return;
                             }
 
@@ -50,6 +51,8 @@ class Player extends Component {
                                 img: playbackState.item.album.images[0].url
                             });
                         });
+
+
 
                         resolve(player);
                     });
@@ -87,26 +90,26 @@ class Player extends Component {
         })
     }
 
-    // initPlayerIfNotCurrentlyPlaying(device_id) {
-    //     // Set playback device 
-    //     fetchSpotify('/me/player', { method: 'PUT', body: JSON.stringify({ device_ids: [device_id] }) });
+    initPlayerIfNotCurrentlyPlaying(device_id) {
+        // Set playback device 
+        fetchSpotify('/me/player', { method: 'PUT', body: JSON.stringify({ device_ids: [device_id] }) });
 
-    //     // Init player with last played item
-    //     fetchSpotify('/me/player/recently-played?limit=1').then(recentlyPlayed => {
-    //         if (recentlyPlayed && recentlyPlayed.items && recentlyPlayed.items[0]) {
-    //             const lastPlayedItem = recentlyPlayed.items[0];
-    //             this.setState({
-    //                 isPlaying: false,
-    //                 progress: 0,
-    //                 duration: lastPlayedItem.track.duration_ms,
-    //                 title: lastPlayedItem.track.name,
-    //                 artist: lastPlayedItem.track.artists.map(artist => artist.name).join(', '),
-    //                 img: lastPlayedItem.track.album.images[0].url,
-    //                 lastPlayedItem: { contextUri: lastPlayedItem.track.uri }
-    //             })
-    //         }
-    //     });
-    // }
+        // Init player with last played item
+        fetchSpotify('/me/player/recently-played?limit=1').then(recentlyPlayed => {
+            if (recentlyPlayed && recentlyPlayed.items && recentlyPlayed.items[0]) {
+                const lastPlayedItem = recentlyPlayed.items[0];
+                this.setState({
+                    isPlaying: false,
+                    progress: 0,
+                    duration: lastPlayedItem.track.duration_ms,
+                    title: lastPlayedItem.track.name,
+                    artist: lastPlayedItem.track.artists.map(artist => artist.name).join(', '),
+                    img: lastPlayedItem.track.album.images[0].url,
+                    lastPlayedItem: { contextUri: lastPlayedItem.track.uri }
+                })
+            }
+        });
+    }
 
     fetchPlaybackState() {
         fetchSpotify('/me/player').then(playbackState => {
@@ -124,15 +127,20 @@ class Player extends Component {
     }
 
     play() {
-        this.player.then(player => player.resme());
+        const body = {};
+        if (this.state.lastPlayedItem.contextUri) body.uris = [this.state.lastPlayedItem.contextUri];
+        fetchSpotify('/me/player/play', { method: 'PUT', body: body }).then(() => {
+            this.setState({ lastPlayedItem: { contextUri: null } });
+        });
     }
 
     pause() {
-        this.player.then(player => player.pause());
+        fetchSpotify('/me/player/pause', { method: 'PUT' });
     }
 
     togglePlay() {
-        this.player.then(player => player.togglePlay());
+        if (this.state.isPlaying) this.pause();
+        else this.play();
     }
 
     render() {
@@ -153,8 +161,8 @@ class Player extends Component {
                                         </Box>
                                     </CardMedia>
                                     <Box className={classes.mediaData}>
-                                        <Typography variant='body2' noWrap={true}>{this.state.title}</Typography>
-                                        <Typography variant='caption' noWrap={true}>{this.state.artist}</Typography>
+                                        <Typography variant='body2' noWrap >{this.state.title}</Typography>
+                                        <Typography variant='caption' noWrap >{this.state.artist}</Typography>
                                         <Slider size="small" value={this.state.progress} min={0} max={this.state.duration} color='secondary' sx={{ height: 4, padding: '0 !important' }} />
                                     </Box>
                                 </Box>
@@ -211,9 +219,10 @@ const styles = (theme) => ({
         justifyContent: 'left'
     },
     albumCardMedia: {
+        flexGrow: 1,
         borderRadius: '15px 15px 0 15px',
         height: '84px',
-        width: '10vh',
+        maxWidth: '150px',
     },
     albumCardMediaOverlay: {
         color: colors.grey["900"],
@@ -234,6 +243,7 @@ const styles = (theme) => ({
     },
     mediaData: {
         flex: 1,
+        flexGrow: 4,
         justifyContent: 'center',
         color: 'white',
         padding: '8px'
