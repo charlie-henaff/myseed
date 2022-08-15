@@ -26,7 +26,7 @@ class Player extends Component {
             const player = new window.Spotify.Player({
                 name: 'mySeed',
                 getOAuthToken: cb => { cb(localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN)); },
-                volume: 0.5
+                volume: 0.25
             });
 
             player.connect().then(isReady => {
@@ -41,7 +41,6 @@ class Player extends Component {
                                 return;
                             }
 
-                            console.log('Init state');
                             this.setState({
                                 isPlaying: playbackState.is_playing,
                                 progress: playbackState.progress_ms,
@@ -52,12 +51,7 @@ class Player extends Component {
                             });
                         });
 
-                        player.addListener('player_state_changed', playerState => {
-                            this.updateState(playerState);
-                        });
-
                         resolve(player);
-
                     });
 
                 }
@@ -71,17 +65,12 @@ class Player extends Component {
     componentDidMount() {
         // this.intervalPlaybackState = setInterval(() => {
         //     this.fetchPlaybackState();
-        // }, 1000);        
+        // }, 1000);
     }
 
     componentWillUnmount() {
         if (this.intervalPlaybackState) clearInterval(this.intervalPlaybackState);
-    }
-
-    componentWillUnmount() {
-        this.player.then(player => {
-            player.disconnect()
-        });
+        this.player.then(player => player.disconnect());
     }
 
     updateState(playerState) {
@@ -119,49 +108,27 @@ class Player extends Component {
     //     });
     // }
 
-    // fetchPlaybackState() {
-    //     fetchSpotify('/me/player').then(playbackState => {
-    //         if (playbackState) {
-
-    //             this.setState({
-    //                 isPlaying: playbackState.is_playing,
-    //                 progress: playbackState.progress_ms,
-    //                 duration: playbackState.item.duration_ms,
-    //                 title: playbackState.item.name,
-    //                 artist: playbackState.item.artists.map(artist => artist.name).join(', '),
-    //                 img: playbackState.item.album.images[0].url
-    //             });
-
-    //         } else if (!this.lastPlayedItemRequested) {
-    //             this.lastPlayedItemRequested = true;
-    //             fetchSpotify('/me/player/recently-played?limit=1').then(recentlyPlayed => {
-    //                 if (recentlyPlayed && recentlyPlayed.items && recentlyPlayed.items[0]) {
-    //                     const lastPlayedItem = recentlyPlayed.items[0];
-    //                     this.setState({
-    //                         isPlaying: false,
-    //                         progress: 0,
-    //                         duration: lastPlayedItem.track.duration_ms,
-    //                         title: lastPlayedItem.track.name,
-    //                         artist: lastPlayedItem.track.artists.map(artist => artist.name).join(', '),
-    //                         img: lastPlayedItem.track.album.images[0].url,
-    //                         lastPlayedItem: { contextUri: lastPlayedItem.track.uri }
-    //                     })
-    //                 }
-    //             });
-    //         }
-    //     });
-    // }
-
-    play() {
-        this.player.then(player => {
-            player.resme()
+    fetchPlaybackState() {
+        fetchSpotify('/me/player').then(playbackState => {
+            if (playbackState) {
+                this.setState({
+                    isPlaying: playbackState.is_playing,
+                    progress: playbackState.progress_ms,
+                    duration: playbackState.item.duration_ms,
+                    title: playbackState.item.name,
+                    artist: playbackState.item.artists.map(artist => artist.name).join(', '),
+                    img: playbackState.item.album.images[0].url
+                });
+            }
         });
     }
 
+    play() {
+        this.player.then(player => player.resme());
+    }
+
     pause() {
-        this.player.then(player => {
-            player.pause()
-        });
+        this.player.then(player => player.pause());
     }
 
     togglePlay() {
