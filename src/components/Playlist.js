@@ -36,18 +36,19 @@ class Playlist extends Component {
     store.dispatch({ type: layoutStates.FULL_SIZE_CONTENT, fullSizeContent: false });
     store.dispatch({ type: appBarStates.TITLE, title: 'Playlist' });
 
-    const { tracks } = this.props;
-    if (!tracks) {
-      getTopRecomendations()
-    }
+    getTopRecomendations();
   }
 
   componentDidUpdate(prevProps, prevState) {
     const { tracks } = this.props;
-    if (tracks !== prevProps.tracks) {
+    if (tracks && tracks !== prevProps.tracks) {
       store.dispatch({ type: spotifyPlayerState.VISIBLE, visible: true });
       store.dispatch({ type: spotifyPlayerState.URIS, uris: tracks.map(track => track.uri) });
     }
+  }
+
+  componentWillUnmount() {
+    store.dispatch({ type: spotifyPlayerState.VISIBLE, visible: false });
   }
 
   startPLaylistHere(trackIndex) {
@@ -73,11 +74,11 @@ class Playlist extends Component {
       <>
         {playlistLoading && <LinearProgress color="secondary" />}
         <Container maxWidth={'xl'}>
-          {!tracks ? "" : (
+          {playlistLoading || !tracks ? "" : (
             <Box py={2}>
               <Grid container spacing={2}>
                 {tracks.map((item, index) => {
-                  return <Artist name={item.name} avatarUrl={item.album?.images?.pop()?.url} key={"artist_" + item.id} onCardClick={() => this.startPLaylistHere(index)} />
+                  return <Artist name={item.name} avatarUrl={item.album?.images[1].url} key={"artist_" + item.id} onCardClick={() => this.startPLaylistHere(index)} />
                 })}
               </Grid>
             </Box>

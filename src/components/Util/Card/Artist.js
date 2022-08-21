@@ -17,7 +17,7 @@ class Artist extends Component {
     static propTypes = {
         name: PropTypes.string,
         avatarUrl: PropTypes.string,
-        onCardClick: PropTypes.func.isRequired,
+        onCardClick: PropTypes.func,
     };
 
     render() {

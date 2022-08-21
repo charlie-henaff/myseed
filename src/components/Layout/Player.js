@@ -71,7 +71,8 @@ class Player extends Component {
     });
 
     componentWillUnmount() {
-        if (this.intervalPlaybackState) clearInterval(this.intervalPlaybackState);
+        this.stopProgressInterval();
+        clearInterval(this.playbackStateInterval);
         this.player.then(player => player.disconnect());
     }
 
@@ -102,7 +103,7 @@ class Player extends Component {
     }
 
     startProgressInterval() {
-        if (this.progressInterval !== null) clearInterval(this.progressInterval);
+        if (this.progressInterval !== null) this.stopProgressInterval();
         this.setState({ isPlaying: true });
         this.progressInterval = setInterval(() => {
             this.setState({ progress: this.state.progress + 1000 });

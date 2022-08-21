@@ -1,17 +1,17 @@
-import React, { Component } from "react";
 import { Box, Container, Grid, LinearProgress } from "@mui/material";
-import { withStyles } from '@mui/styles';
-import { layoutStates } from "../redux/reducers/layout";
-import { APP_CONST } from "../constants";
-import PropTypes from "prop-types";
-import { appBarStates } from "../redux/reducers/layout/appBar";
-import { searchStates } from "../redux/reducers/search"
-import { connect } from "react-redux";
 import Typography from "@mui/material/Typography";
-import Artist from "./Util/Card/Artist";
-import store from "../redux/store";
+import { withStyles } from '@mui/styles';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import { APP_CONST } from "../constants";
 import history from '../history';
+import { layoutStates } from "../redux/reducers/layout";
+import { appBarStates } from "../redux/reducers/layout/appBar";
+import { searchStates } from "../redux/reducers/search";
+import store from "../redux/store";
 import { search } from "../services/SearchServices";
+import Artist from "./Util/Card/Artist";
 
 class Search extends Component {
 
@@ -65,7 +65,7 @@ class Search extends Component {
                             <Typography variant="h6" gutterBottom>Artistes</Typography>
                             <Grid container spacing={2}>
                                 {artists.map(item => {
-                                    return <Artist name={item.name} avatarUrl={item.images?.pop()?.url} key={"artist_" + item.id} />
+                                    return <Artist name={item.name} avatarUrl={item.images[1]?.url} key={"artist_" + item.id} />
                                 })}
                             </Grid>
                         </Box>
@@ -75,7 +75,7 @@ class Search extends Component {
                             <Typography variant="h6" gutterBottom>Albums</Typography>
                             <Grid container spacing={2}>
                                 {albums.map(item => {
-                                    return <Artist name={item.name} avatarUrl={item.images?.pop()?.url} key={"artist_" + item.id} />
+                                    return <Artist name={item.name} avatarUrl={item.images[1]?.url} key={"artist_" + item.id} />
                                 })}
                             </Grid>
                         </Box>
@@ -85,7 +85,7 @@ class Search extends Component {
                             <Typography variant="h6" gutterBottom>Musiques</Typography>
                             <Grid container spacing={2}>
                                 {tracks.map(item => {
-                                    return <Artist name={item.name} avatarUrl={item.album?.images?.pop()?.url} key={"artist_" + item.id} />
+                                    return <Artist name={item.name} avatarUrl={item.album?.images[1]?.url} key={"artist_" + item.id} />
                                 })}
                             </Grid>
                         </Box>
