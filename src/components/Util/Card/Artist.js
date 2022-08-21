@@ -1,7 +1,7 @@
-import React, {Component} from "react";
-import {Box, ButtonBase, Card, CardMedia, colors, Grid, Typography} from "@mui/material";
+import { Box, ButtonBase, Card, CardMedia, colors, Grid, Typography } from "@mui/material";
 import { withStyles } from '@mui/styles';
 import PropTypes from "prop-types";
+import React, { Component } from "react";
 import imgTest from "../../../assets/img/man_listening_music_in_sleeping.jpg";
 import Overlay from "../Overlay";
 
@@ -17,11 +17,12 @@ class Artist extends Component {
     static propTypes = {
         name: PropTypes.string,
         avatarUrl: PropTypes.string,
+        onCardClick: PropTypes.func.isRequired,
     };
 
     render() {
         const {classes} = this.props;
-        const {name, avatarUrl} = this.props;
+        const {name, avatarUrl, onCardClick} = this.props;
         const {hover, detailOpened} = this.state;
 
         const setHover = (value) => {
@@ -33,7 +34,8 @@ class Artist extends Component {
                 <Grid item xs={detailOpened ? 12 : 6} sm={detailOpened ? 12 : 4} md={detailOpened ? 12 : 2}>
                     <Card className={classes.root}
                           onMouseOver={() => setHover(true)}
-                          onMouseOut={() => setHover(false)}>
+                          onMouseOut={() => setHover(false)}
+                          onClick={onCardClick}>
                         <ButtonBase className={classes.button}>
                             <CardMedia className={classes.media} image={avatarUrl ? avatarUrl : imgTest}>
                                 <Overlay color={colors.grey["900"]} opacity={!hover ? 0.3 : 0}/>

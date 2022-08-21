@@ -59,7 +59,6 @@ class Player extends Component {
                         });
 
                         player.addListener('player_state_changed', playbackState => {
-                            console.log(playbackState);
                             this.updateState(playbackState)
                         });
 
