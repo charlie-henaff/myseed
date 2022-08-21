@@ -1,10 +1,11 @@
-import { ComputerRounded, FavoriteBorderRounded, KeyboardArrowUpRounded, PauseRounded, PlayArrowRounded } from '@mui/icons-material';
+import { ComputerRounded, DevicesRounded, FavoriteBorderRounded, KeyboardArrowUpRounded, PauseRounded, PlayArrowRounded } from '@mui/icons-material';
 import { CardMedia, colors, IconButton, Slide, Slider, Typography } from '@mui/material';
 import { withStyles } from '@mui/styles';
 import { Box } from '@mui/system';
 import { connect } from 'react-redux';
 import { APP_CONST } from '../../constants';
 import { fetch as fetchSpotify } from '../../services/SpotifyServices';
+import theme from '../../theme';
 
 const { Component } = require("react");
 
@@ -80,6 +81,7 @@ class Player extends Component {
         const currentTrack = playerState?.track_window.current_track;
 
         if (!playerState || !currentTrack) {
+            this.setState({ isPlayedLocally: false });
             this.startFetchPlaybackState();
             return;
         }
@@ -192,16 +194,19 @@ class Player extends Component {
                                             </IconButton>
                                         </Box>
                                     </CardMedia>
-                                    <Box className={classes.mediaData}>
-                                        <Typography variant='body2' noWrap >{this.state.title}</Typography>
-                                        <Typography variant='caption' noWrap >{this.state.artist}</Typography>
-                                        <Slider size="small" value={this.state.progress} min={0} max={this.state.duration} color='secondary' sx={{ height: 4, padding: '0 !important' }} />
-                                    </Box>
+                                </Box>
+
+                                <Box className={classes.mediaData}>
+                                    <Typography variant='body2' noWrap >{this.state.title}</Typography>
+                                    <Typography variant='caption' noWrap >{this.state.artist}</Typography>
+                                    <Slider size="small" value={this.state.progress} min={0} max={this.state.duration} color='secondary' sx={{ height: 4, padding: '0 !important' }} />
                                 </Box>
 
                                 <Box className={classes.rightControls}>
-                                    <IconButton size='small ' sx={{ color: 'white' }}>
-                                        <ComputerRounded sx={{ color: 'white' }} />
+                                    <IconButton size='small ' sx={{ color: this.state.isPlayedLocally ? 'white' : theme.palette.secondary.main }}>
+                                        {this.state.isPlayedLocally
+                                            ? <ComputerRounded sx={{ color: 'white' }} />
+                                            : <DevicesRounded sx={{ color: theme.palette.secondary.main }} />}
                                     </IconButton>
                                     <IconButton size='small' sx={{ color: 'white' }} >
                                         <FavoriteBorderRounded sx={{ color: 'white' }} />
@@ -211,7 +216,6 @@ class Player extends Component {
                                             ? <PauseRounded sx={{ color: 'white' }} />
                                             : <PlayArrowRounded sx={{ color: 'white' }} />
                                         }
-
                                     </IconButton>
                                 </Box>
 
@@ -240,7 +244,6 @@ const styles = (theme) => ({
     },
     content: {
         display: 'flex',
-        direction: 'row',
         width: '100%',
     },
 
@@ -248,6 +251,7 @@ const styles = (theme) => ({
         flex: 1,
         display: 'flex',
         alignItems: 'center',
+        minWidth: '58px',
         justifyContent: 'left'
     },
     albumCardMedia: {
@@ -274,15 +278,16 @@ const styles = (theme) => ({
         backgroundColor: 'rgba(0, 0, 0, 0.25)',
     },
     mediaData: {
-        flex: 1,
-        flexGrow: 4,
+        flex: 10,
+        overflow: 'hidden',
         justifyContent: 'center',
+        alignItems: 'flex-start',
         color: 'white',
         padding: '8px'
     },
 
     rightControls: {
-        flex: 0,
+        flex: 1,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'right',
