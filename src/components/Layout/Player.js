@@ -1,5 +1,5 @@
 import { ComputerRounded, DevicesRounded, FavoriteBorderRounded, KeyboardArrowUpRounded, PauseRounded, PlayArrowRounded } from '@mui/icons-material';
-import { CardMedia, colors, IconButton, Slide, Slider, Typography } from '@mui/material';
+import { CardMedia, colors, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Slide, Slider, Typography } from '@mui/material';
 import { withStyles } from '@mui/styles';
 import { Box } from '@mui/system';
 import { connect } from 'react-redux';
@@ -13,13 +13,17 @@ class Player extends Component {
 
     state = {
         isPlaying: false,
-        progressBarValue: 0,
+        isPlayedLocally: false,
         progress: 0,
         duration: 1,
         title: '',
         artist: '',
         img: '',
-        isPlayedLocally: false
+        devices: {
+            list: [],
+            current: null,
+            openMenuAnchor: null,
+        }
     }
 
     progressInterval = null;
@@ -63,6 +67,7 @@ class Player extends Component {
                             this.updateState(playbackState)
                         });
 
+                        this.getDevices();
                         resolve(player);
 
                     });
@@ -75,6 +80,19 @@ class Player extends Component {
         this.stopProgressInterval();
         clearInterval(this.playbackStateInterval);
         this.player.then(player => player.disconnect());
+    }
+
+    getDevices() {
+        fetchSpotify('/me/player/devices').then(res => {
+            if (res?.devices) {
+                this.setState({
+                    devices: {
+                        list: res.devices,
+                        current: res.devices.find(device => device.is_active)
+                    }
+                });
+            }
+        });
     }
 
     updateState(playerState) {
@@ -178,52 +196,88 @@ class Player extends Component {
     }
 
     render() {
+        const isDevicesMenuOpen = Boolean(this.state.devices.openMenuAnchor);
         const { classes } = this.props;
         return (
-            <>
-                <Slide direction="up" in={this.state.title.length > 1} mountOnEnter unmountOnExit>
-                    <Box className={classes.root}>
-                        <Box className={classes.shape}>
-                            <Box className={classes.content}>
+            <Slide direction="up" in={this.state.title.length > 1} mountOnEnter unmountOnExit>
+                <Box className={classes.root}>
+                    <Box className={classes.shape}>
+                        <Box className={classes.content}>
 
-                                <Box className={classes.leftControls}>
-                                    <CardMedia className={classes.albumCardMedia} image={this.state.img}>
-                                        <Box className={classes.albumCardMediaControls}>
-                                            <IconButton className={classes.albumMediaCardBtn} size='small'>
-                                                <KeyboardArrowUpRounded sx={{ fontSize: '28px', color: 'white' }} />
-                                            </IconButton>
-                                        </Box>
-                                    </CardMedia>
-                                </Box>
-
-                                <Box className={classes.mediaData}>
-                                    <Typography variant='body2' noWrap >{this.state.title}</Typography>
-                                    <Typography variant='caption' noWrap >{this.state.artist}</Typography>
-                                    <Slider size="small" value={this.state.progress} min={0} max={this.state.duration} color='secondary' sx={{ height: 4, padding: '0 !important' }} />
-                                </Box>
-
-                                <Box className={classes.rightControls}>
-                                    <IconButton size='small ' sx={{ color: this.state.isPlayedLocally ? 'white' : theme.palette.secondary.main }}>
-                                        {this.state.isPlayedLocally
-                                            ? <ComputerRounded sx={{ color: 'white' }} />
-                                            : <DevicesRounded sx={{ color: theme.palette.secondary.main }} />}
-                                    </IconButton>
-                                    <IconButton size='small' sx={{ color: 'white' }} >
-                                        <FavoriteBorderRounded sx={{ color: 'white' }} />
-                                    </IconButton>
-                                    <IconButton size='small' sx={{ color: 'white' }} onClick={() => this.togglePlay()}>
-                                        {this.state.isPlaying
-                                            ? <PauseRounded sx={{ color: 'white' }} />
-                                            : <PlayArrowRounded sx={{ color: 'white' }} />
-                                        }
-                                    </IconButton>
-                                </Box>
-
+                            <Box className={classes.leftControls}>
+                                <CardMedia className={classes.albumCardMedia} image={this.state.img}>
+                                    <Box className={classes.albumCardMediaControls}>
+                                        <IconButton className={classes.albumMediaCardBtn} size='small'>
+                                            <KeyboardArrowUpRounded sx={{ fontSize: '28px', color: 'white' }} />
+                                        </IconButton>
+                                    </Box>
+                                </CardMedia>
                             </Box>
+
+                            <Box className={classes.mediaData}>
+                                <Typography variant='body2' noWrap >{this.state.title}</Typography>
+                                <Typography variant='caption' noWrap >{this.state.artist}</Typography>
+                                <Slider size="small" value={this.state.progress} min={0} max={this.state.duration} color='secondary' sx={{ height: 4, padding: '0 !important' }} />
+                            </Box>
+
+                            <Box className={classes.rightControls}>
+                                <IconButton id="devicesBtn" size='small '
+                                    sx={{ color: this.state.isPlayedLocally ? 'white' : theme.palette.secondary.main }}
+                                    aria-controls={isDevicesMenuOpen ? 'devicesMenu' : undefined}
+                                    aria-haspopup="true"
+                                    aria-expanded={isDevicesMenuOpen ? 'true' : undefined}
+                                    onClick={event => this.setState({ devices: { openMenuAnchor: event.currentTarget } })}
+                                >
+                                    {this.state.isPlayedLocally
+                                        ? <ComputerRounded sx={{ color: 'white' }} />
+                                        : <DevicesRounded sx={{ color: theme.palette.secondary.main }} />}
+                                </IconButton>
+                                <IconButton size='small' sx={{ color: 'white' }} >
+                                    <FavoriteBorderRounded sx={{ color: 'white' }} />
+                                </IconButton>
+                                <IconButton size='small' sx={{ color: 'white' }} onClick={() => this.togglePlay()}>
+                                    {this.state.isPlaying
+                                        ? <PauseRounded sx={{ color: 'white' }} />
+                                        : <PlayArrowRounded sx={{ color: 'white' }} />
+                                    }
+                                </IconButton>
+
+                                {this.devicesMenuRender()}
+                            </Box>
+
                         </Box>
                     </Box>
-                </Slide>
-            </>
+                </Box>
+            </Slide>
+        );
+    }
+
+    devicesMenuRender = () => {
+        const isDevicesMenuOpen = Boolean(this.state.devices.openMenuAnchor);
+        return (
+            <Menu
+                id="devicesMenu"
+                open={isDevicesMenuOpen}
+                onClose={() => this.setState({ devices: { openMenuAnchor: null } })}
+                anchorEl={this.state.devices.openMenuAnchor}
+                PaperProps={{
+                    elevation: 1,
+                    sx: {
+                        overflow: 'visible',
+                        filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                    },
+                }}
+                transformOrigin={{ horizontal: 'top', vertical: 'bottom' }}
+                anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
+            >
+                {this.state.devices.list && this.state.devices.list.map(device =>
+                    <MenuItem key={device.id}>
+                        <ListItemIcon><ComputerRounded fontSize="small" /></ListItemIcon>
+                        <ListItemText>{device.name}</ListItemText>
+                    </MenuItem>
+                )}
+            </Menu>
+
         );
     }
 }
