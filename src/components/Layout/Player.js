@@ -18,9 +18,12 @@ class Player extends Component {
         title: '',
         artist: '',
         img: '',
-        lastPlayedItem: { contextUri: null }
+        isPlayedLocally: false
     }
 
+    progressInterval = null;
+    playbackStateInterval = null;
+    localDeviceId = null;
     player = new Promise(resolve => {
         if (window.Spotify) {
 
@@ -34,11 +37,11 @@ class Player extends Component {
                 if (isReady) {
 
                     player.addListener('ready', ({ device_id }) => {
+                        this.localDeviceId = device_id;
 
                         fetchSpotify('/me/player').then(playbackState => {
                             if (!playbackState) {
-                                console.log('fetch playback here');
-                                this.initPlayerIfNotCurrentlyPlaying(device_id);
+                                this.initPlayerIfNotCurrentlyPlaying();
                                 return;
                             }
 
@@ -50,26 +53,22 @@ class Player extends Component {
                                 artist: playbackState.item.artists.map(artist => artist.name).join(', '),
                                 img: playbackState.item.album.images[0].url
                             });
+
+                            this.toggleProgressInterval();
+                            if (!this.state.isPlayedLocally) this.startFetchPlaybackState();
                         });
 
-
+                        player.addListener('player_state_changed', playbackState => {
+                            this.updateState(playbackState)
+                        });
 
                         resolve(player);
-                    });
 
+                    });
                 }
             });
         }
     });
-
-    intervalPlaybackState = null;
-    lastPlayedItemRequested = false;
-
-    componentDidMount() {
-        // this.intervalPlaybackState = setInterval(() => {
-        //     this.fetchPlaybackState();
-        // }, 1000);
-    }
 
     componentWillUnmount() {
         if (this.intervalPlaybackState) clearInterval(this.intervalPlaybackState);
@@ -77,8 +76,6 @@ class Player extends Component {
     }
 
     updateState(playerState) {
-        console.log('Update player state : ')
-        console.log(playerState);
         const currentTrack = playerState.track_window.current_track;
         this.setState({
             isPlaying: !playerState.paused,
@@ -87,55 +84,71 @@ class Player extends Component {
             title: currentTrack.name,
             artist: currentTrack.artists.map(artist => artist.name).join(', '),
             img: currentTrack.album.images[0].url,
-        })
+        });
+        this.toggleProgressInterval();
     }
 
-    initPlayerIfNotCurrentlyPlaying(device_id) {
-        // Set playback device 
-        fetchSpotify('/me/player', { method: 'PUT', body: JSON.stringify({ device_ids: [device_id] }) });
-
-        // Init player with last played item
-        fetchSpotify('/me/player/recently-played?limit=1').then(recentlyPlayed => {
-            if (recentlyPlayed && recentlyPlayed.items && recentlyPlayed.items[0]) {
-                const lastPlayedItem = recentlyPlayed.items[0];
-                this.setState({
-                    isPlaying: false,
-                    progress: 0,
-                    duration: lastPlayedItem.track.duration_ms,
-                    title: lastPlayedItem.track.name,
-                    artist: lastPlayedItem.track.artists.map(artist => artist.name).join(', '),
-                    img: lastPlayedItem.track.album.images[0].url,
-                    lastPlayedItem: { contextUri: lastPlayedItem.track.uri }
-                })
+    startProgressInterval() {
+        if (this.progressInterval !== null) clearInterval(this.progressInterval);
+        this.setState({ isPlaying: true });
+        this.progressInterval = setInterval(() => {
+            this.setState({ progress: this.state.progress + 1000 });
+            if (this.state.progress >= this.state.duration) {
+                this.startFetchPlaybackState();
             }
+        }, 1000);
+    }
+
+    stopProgressInterval() {
+        this.setState({ isPlaying: false });
+        if (this.progressInterval !== null) clearInterval(this.progressInterval);
+    }
+
+    toggleProgressInterval() {
+        if (this.state.isPlaying) this.startProgressInterval()
+        else this.stopProgressInterval();
+    }
+
+    initPlayerIfNotCurrentlyPlaying() {
+        fetchSpotify('/me/player', { method: 'PUT', body: JSON.stringify({ device_ids: [this.localDeviceId] }) }).then(() => {
+            this.setState({ isPlayedLocally: true });
         });
     }
 
-    fetchPlaybackState() {
-        fetchSpotify('/me/player').then(playbackState => {
-            if (playbackState) {
-                this.setState({
-                    isPlaying: playbackState.is_playing,
-                    progress: playbackState.progress_ms,
-                    duration: playbackState.item.duration_ms,
-                    title: playbackState.item.name,
-                    artist: playbackState.item.artists.map(artist => artist.name).join(', '),
-                    img: playbackState.item.album.images[0].url
-                });
-            }
-        });
+    startFetchPlaybackState() {
+        if (this.playbackStateInterval !== null) clearInterval(this.playbackStateInterval);
+        this.playbackStateInterval = setInterval(() => {
+            fetchSpotify('/me/player').then(playbackState => {
+                if (playbackState) {
+                    this.setState({
+                        isPlaying: playbackState.is_playing,
+                        progress: playbackState.progress_ms,
+                        duration: playbackState.item.duration_ms,
+                        title: playbackState.item.name,
+                        artist: playbackState.item.artists.map(artist => artist.name).join(', '),
+                        img: playbackState.item.album.images[0].url,
+                        isPlayedLocally: false,
+                    });
+                }
+            });
+            this.toggleProgressInterval();
+        }, 3000);
     }
 
     play() {
         const body = {};
-        if (this.state.lastPlayedItem.contextUri) body.uris = [this.state.lastPlayedItem.contextUri];
-        fetchSpotify('/me/player/play', { method: 'PUT', body: body }).then(() => {
-            this.setState({ lastPlayedItem: { contextUri: null } });
+
+        this.startProgressInterval();
+        fetchSpotify('/me/player/play', { method: 'PUT', body: JSON.stringify(body) }).then(() => {
+            if (!this.state.isPlayedLocally) setTimeout(() => this.startFetchPlaybackState(), 500);
         });
     }
 
     pause() {
-        fetchSpotify('/me/player/pause', { method: 'PUT' });
+        this.stopProgressInterval();
+        fetchSpotify('/me/player/pause', { method: 'PUT' }).then(() => {
+            if (!this.state.isPlayedLocally) setTimeout(() => this.startFetchPlaybackState(), 500);
+        });
     }
 
     togglePlay() {
@@ -260,17 +273,10 @@ const styles = (theme) => ({
 });
 
 const mapStateToProps = state => {
-    // const severity = state.app.layout.snackBar.severity;
-    // const message = state.app.layout.snackBar.message;
-    // const isOpen = state.app.layout.snackBar.isOpen;
-    // return { severity, message, isOpen };
-
     return {};
 };
 
 const mapDispatchToProps = dispatch => ({
-    // close: () => dispatch({ type: snackBarState.isOpen, isOpen: false })
-    // getPlaybaCKState() => dispatch({type: playerState.plac})
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Player));
