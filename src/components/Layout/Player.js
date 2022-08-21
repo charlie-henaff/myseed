@@ -59,6 +59,7 @@ class Player extends Component {
                         });
 
                         player.addListener('player_state_changed', playbackState => {
+                            console.log(playbackState);
                             this.updateState(playbackState)
                         });
 
@@ -76,7 +77,13 @@ class Player extends Component {
     }
 
     updateState(playerState) {
-        const currentTrack = playerState.track_window.current_track;
+        const currentTrack = playerState?.track_window.current_track;
+
+        if (!playerState || !currentTrack) {
+            this.startFetchPlaybackState();
+            return;
+        }
+
         this.setState({
             isPlaying: !playerState.paused,
             progress: playerState.position,
@@ -84,8 +91,15 @@ class Player extends Component {
             title: currentTrack.name,
             artist: currentTrack.artists.map(artist => artist.name).join(', '),
             img: currentTrack.album.images[0].url,
+            isPlayedLocally: true,
         });
+
         this.toggleProgressInterval();
+
+        if (this.state.isPlayedLocally) {
+            clearInterval(this.playbackStateInterval);
+            this.playbackStateInterval = null;
+        }
     }
 
     startProgressInterval() {
@@ -118,6 +132,11 @@ class Player extends Component {
     startFetchPlaybackState() {
         if (this.playbackStateInterval !== null) clearInterval(this.playbackStateInterval);
         this.playbackStateInterval = setInterval(() => {
+            if (this.state.isPlayedLocally) {
+                clearInterval(this.playbackStateInterval);
+                this.playbackStateInterval = null;
+                return;
+            }
             fetchSpotify('/me/player').then(playbackState => {
                 if (playbackState) {
                     this.setState({
