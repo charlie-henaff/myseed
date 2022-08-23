@@ -145,7 +145,16 @@ class Player extends Component {
 
     initPlayerIfNotCurrentlyPlaying() {
         fetchSpotify('/me/player', { method: 'PUT', body: JSON.stringify({ device_ids: [this.localDeviceId] }) }).then(() => {
-            this.setState({ isPlayedLocally: true });
+            this.setState({
+                isPlayedLocally: true,
+                devices: {
+                    ...this.state.devices,
+                    current: {
+                        ...this.state.devices.current,
+                        id: this.localDeviceId,
+                    }
+                }
+            });
         });
     }
 
@@ -166,7 +175,7 @@ class Player extends Component {
                         title: playbackState.item.name,
                         artist: playbackState.item.artists.map(artist => artist.name).join(', '),
                         img: playbackState.item.album.images[0].url,
-                        isPlayedLocally: false,
+                        isPlayedLocally: false
                     });
                 }
             });
@@ -226,7 +235,7 @@ class Player extends Component {
                                     aria-controls={isDevicesMenuOpen ? 'devicesMenu' : undefined}
                                     aria-haspopup="true"
                                     aria-expanded={isDevicesMenuOpen ? 'true' : undefined}
-                                    onClick={event => this.setState({ devices: { openMenuAnchor: event.currentTarget } })}
+                                    onClick={event => this.setState({ devices: { ...this.state.devices, openMenuAnchor: event.currentTarget } })}
                                 >
                                     {this.state.isPlayedLocally
                                         ? <ComputerRounded sx={{ color: 'white' }} />
@@ -252,13 +261,13 @@ class Player extends Component {
         );
     }
 
-    devicesMenuRender = () => {
+    devicesMenuRender() {
         const isDevicesMenuOpen = Boolean(this.state.devices.openMenuAnchor);
         return (
             <Menu
                 id="devicesMenu"
                 open={isDevicesMenuOpen}
-                onClose={() => this.setState({ devices: { openMenuAnchor: null } })}
+                onClose={() => this.setState({ devices: { ...this.state.devices, openMenuAnchor: null } })}
                 anchorEl={this.state.devices.openMenuAnchor}
                 PaperProps={{
                     elevation: 1,
@@ -271,9 +280,9 @@ class Player extends Component {
                 anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
             >
                 {this.state.devices.list && this.state.devices.list.map(device =>
-                    <MenuItem key={device.id}>
-                        <ListItemIcon><ComputerRounded fontSize="small" /></ListItemIcon>
-                        <ListItemText>{device.name}</ListItemText>
+                    <MenuItem dense key={device.id}>
+                        <ListItemIcon sx={{color: device.id === this.state.devices.current?.id ? theme.palette.secondary.main : ''}}><ComputerRounded fontSize="small" /></ListItemIcon>
+                        <ListItemText sx={{ color: device.id === this.state.devices.current?.id ? theme.palette.secondary.main : '' }}>{device.name}</ListItemText>
                     </MenuItem>
                 )}
             </Menu>
