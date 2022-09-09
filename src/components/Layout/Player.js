@@ -4,7 +4,7 @@ import { withStyles } from '@mui/styles';
 import { Box } from '@mui/system';
 import { connect } from 'react-redux';
 import { APP_CONST } from '../../constants';
-import { fetch as fetchSpotify } from '../../services/SpotifyServices';
+import { fetch as fetchSpotify, play as playSpotify } from '../../services/SpotifyServices';
 import theme from '../../theme';
 
 const { Component } = require("react");
@@ -21,28 +21,26 @@ class Player extends Component {
         img: '',
         devices: {
             list: [],
-            current: null,
             openMenuAnchor: null,
         }
     }
 
     progressInterval = null;
     playbackStateInterval = null;
-    localDeviceId = null;
     player = new Promise(resolve => {
         if (window.Spotify) {
 
             const player = new window.Spotify.Player({
                 name: 'mySeed',
                 getOAuthToken: cb => { cb(localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN)); },
-                volume: 0.25
+                // volume: 0.25
             });
 
             player.connect().then(isReady => {
                 if (isReady) {
 
                     player.addListener('ready', ({ device_id }) => {
-                        this.localDeviceId = device_id;
+                        localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, device_id);
 
                         fetchSpotify('/me/player').then(playbackState => {
                             if (!playbackState) {
@@ -67,6 +65,8 @@ class Player extends Component {
                             this.updateState(playbackState)
                         });
 
+                        player.activateElement();
+
                         this.getDevices();
                         resolve(player);
 
@@ -85,10 +85,11 @@ class Player extends Component {
     getDevices() {
         fetchSpotify('/me/player/devices').then(res => {
             if (res?.devices) {
+                localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, res.devices.find(device => device.is_active).id);
                 this.setState({
                     devices: {
+                        ...this.state.devices,
                         list: res.devices,
-                        current: res.devices.find(device => device.is_active)
                     }
                 });
             }
@@ -144,18 +145,9 @@ class Player extends Component {
     }
 
     initPlayerIfNotCurrentlyPlaying() {
-        fetchSpotify('/me/player', { method: 'PUT', body: JSON.stringify({ device_ids: [this.localDeviceId] }) }).then(() => {
-            this.setState({
-                isPlayedLocally: true,
-                devices: {
-                    ...this.state.devices,
-                    current: {
-                        ...this.state.devices.current,
-                        id: this.localDeviceId,
-                    }
-                }
-            });
-        });
+        fetchSpotify('/me/player', { method: 'PUT', body: JSON.stringify({ device_ids: [localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID)] }) }).then(() => {
+            this.setState({ isPlayedLocally: true });
+        }).catch(() => setTimeout(() => this.initPlayerIfNotCurrentlyPlaying(), 1000));
     }
 
     startFetchPlaybackState() {
@@ -184,10 +176,8 @@ class Player extends Component {
     }
 
     play() {
-        const body = {};
-
         this.startProgressInterval();
-        fetchSpotify('/me/player/play', { method: 'PUT', body: JSON.stringify(body) }).then(() => {
+        playSpotify({}).then(() => {
             if (!this.state.isPlayedLocally) setTimeout(() => this.startFetchPlaybackState(), 500);
         });
     }
@@ -202,6 +192,12 @@ class Player extends Component {
     togglePlay() {
         if (this.state.isPlaying) this.pause();
         else this.play();
+    }
+
+    openDevicesMenu(event) {
+        this.getDevices();
+        this.setState({ devices: { ...this.state.devices, openMenuAnchor: event.currentTarget } });
+
     }
 
     render() {
@@ -235,7 +231,7 @@ class Player extends Component {
                                     aria-controls={isDevicesMenuOpen ? 'devicesMenu' : undefined}
                                     aria-haspopup="true"
                                     aria-expanded={isDevicesMenuOpen ? 'true' : undefined}
-                                    onClick={event => this.setState({ devices: { ...this.state.devices, openMenuAnchor: event.currentTarget } })}
+                                    onClick={event => this.openDevicesMenu(event)}
                                 >
                                     {this.state.isPlayedLocally
                                         ? <ComputerRounded sx={{ color: 'white' }} />
@@ -281,8 +277,8 @@ class Player extends Component {
             >
                 {this.state.devices.list && this.state.devices.list.map(device =>
                     <MenuItem dense key={device.id}>
-                        <ListItemIcon sx={{color: device.id === this.state.devices.current?.id ? theme.palette.secondary.main : ''}}><ComputerRounded fontSize="small" /></ListItemIcon>
-                        <ListItemText sx={{ color: device.id === this.state.devices.current?.id ? theme.palette.secondary.main : '' }}>{device.name}</ListItemText>
+                        <ListItemIcon sx={{ color: device.id === localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID) ? theme.palette.secondary.main : '' }}><ComputerRounded fontSize="small" /></ListItemIcon>
+                        <ListItemText sx={{ color: device.id === localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID) ? theme.palette.secondary.main : '' }}>{device.name}</ListItemText>
                     </MenuItem>
                 )}
             </Menu>

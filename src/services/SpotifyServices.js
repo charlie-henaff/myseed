@@ -6,7 +6,6 @@ const spotify_login_callback = process.env.REACT_APP_BASE_URL + '/login';
 export const fetch = (uri, options = {}) => {
   if ('undefined' === typeof options.headers) options.headers = new Headers();
 
-
   if (null === options.headers.get('Authorization') && localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN)) {
     options.headers.set('Authorization', `Bearer ${localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN)}`);
   }
@@ -27,7 +26,10 @@ export const fetch = (uri, options = {}) => {
     .then(response => {
       if (response.status === 202) return true;
       if (response.status === 204) return ''; 
-      // if (response.status === 401) return refreshToken().then(() => fetch(uri, options));
+      if (response.status === 401) {
+        options.headers.delete('Authorization');
+        return refreshToken().then(() => fetch(uri, options));
+      }
       if (response.status === 502) return fetch(uri, options);
       if (response.ok) return response.json();
       return response.json()
@@ -36,6 +38,11 @@ export const fetch = (uri, options = {}) => {
           () => { throw new Error(response.statusText || 'An error occurred.'); }
         );
     });
+}
+
+export const play = (body) => {
+  const currentDeviceId = localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID);
+  return fetch('/me/player/play' + (currentDeviceId ? "?device_id=" + currentDeviceId : ''), { method: 'PUT', body: JSON.stringify(body) });
 }
 
 export const auth = () => {

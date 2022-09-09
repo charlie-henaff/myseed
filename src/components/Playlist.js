@@ -12,7 +12,7 @@ import { spotifyPlayerState } from '../redux/reducers/layout/spotifyPlayer';
 import { playlistStates } from '../redux/reducers/playlist';
 import store from '../redux/store';
 import { topsRecommendations } from '../services/PlaylistServices';
-import { fetch as fetchSpotify } from '../services/SpotifyServices';
+import { play } from '../services/SpotifyServices';
 import Artist from './Util/Card/Artist';
 
 
@@ -52,12 +52,7 @@ class Playlist extends Component {
   }
 
   startPLaylistHere(trackIndex) {
-    fetchSpotify('/me/player/play', {
-      method: 'PUT',
-      body: JSON.stringify({
-        uris: [this.props.tracks[trackIndex].uri]
-      })
-    });
+    play({uris: [this.props.tracks[trackIndex].uri]});
 
     // NOT WORKING : Cannot manage queue properly
     // let timeout = 1000;
