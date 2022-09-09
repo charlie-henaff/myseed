@@ -41,7 +41,8 @@ export const fetch = (uri, options = {}) => {
 }
 
 export const play = (body) => {
-  const currentDeviceId = localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID);
+  let currentDeviceId = localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID);
+  if (currentDeviceId === "undefined") currentDeviceId = null;
   return fetch('/me/player/play' + (currentDeviceId ? "?device_id=" + currentDeviceId : ''), { method: 'PUT', body: JSON.stringify(body) });
 }
 

@@ -40,11 +40,13 @@ class Player extends Component {
                 if (isReady) {
 
                     player.addListener('ready', ({ device_id }) => {
-                        localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, device_id);
 
                         fetchSpotify('/me/player').then(playbackState => {
                             if (!playbackState) {
-                                this.initPlayerIfNotCurrentlyPlaying();
+                                localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, device_id);
+                                this.updatePlayingDevices().then(() => {
+                                    this.setState({ isPlayedLocally: true });
+                                });
                                 return;
                             }
 
@@ -85,7 +87,10 @@ class Player extends Component {
     getDevices() {
         fetchSpotify('/me/player/devices').then(res => {
             if (res?.devices) {
-                localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, res.devices.find(device => device.is_active).id);
+                const activeDevice = res.devices.find(device => device.is_active);
+                if (activeDevice && activeDevice !== "undefined" && activeDevice.id) {
+                    localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, activeDevice.id);
+                }
                 this.setState({
                     devices: {
                         ...this.state.devices,
@@ -144,10 +149,9 @@ class Player extends Component {
         else this.stopProgressInterval();
     }
 
-    initPlayerIfNotCurrentlyPlaying() {
-        fetchSpotify('/me/player', { method: 'PUT', body: JSON.stringify({ device_ids: [localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID)] }) }).then(() => {
-            this.setState({ isPlayedLocally: true });
-        }).catch(() => setTimeout(() => this.initPlayerIfNotCurrentlyPlaying(), 1000));
+    updatePlayingDevices() {
+        return fetchSpotify('/me/player', { method: 'PUT', body: JSON.stringify({ device_ids: [localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID)] }) })
+            .catch(() => setTimeout(() => this.updatePlayingDevices(), 1000));
     }
 
     startFetchPlaybackState() {
@@ -176,6 +180,7 @@ class Player extends Component {
     }
 
     play() {
+        this.player.then(player => player.activateElement());
         this.startProgressInterval();
         playSpotify({}).then(() => {
             if (!this.state.isPlayedLocally) setTimeout(() => this.startFetchPlaybackState(), 500);
@@ -198,6 +203,17 @@ class Player extends Component {
         this.getDevices();
         this.setState({ devices: { ...this.state.devices, openMenuAnchor: event.currentTarget } });
 
+    }
+
+    clickOnDeviceItem(newDeviceId) {
+        this.player.then(player => player.activateElement());
+        localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, newDeviceId);
+        this.updatePlayingDevices().then(() => this.setState({
+            devices: {
+                ...this.state.devices,
+                openMenuAnchor: null
+            }
+        }));
     }
 
     render() {
@@ -276,7 +292,7 @@ class Player extends Component {
                 anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
             >
                 {this.state.devices.list && this.state.devices.list.map(device =>
-                    <MenuItem dense key={device.id}>
+                    <MenuItem dense key={device.id} onClick={() => this.clickOnDeviceItem(device.id)}>
                         <ListItemIcon sx={{ color: device.id === localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID) ? theme.palette.secondary.main : '' }}><ComputerRounded fontSize="small" /></ListItemIcon>
                         <ListItemText sx={{ color: device.id === localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID) ? theme.palette.secondary.main : '' }}>{device.name}</ListItemText>
                     </MenuItem>
