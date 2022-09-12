@@ -19,6 +19,7 @@ class Player extends Component {
         title: '',
         artist: '',
         img: '',
+        uri: '',
         devices: {
             list: [],
             openMenuAnchor: null,
@@ -27,61 +28,66 @@ class Player extends Component {
 
     progressInterval = null;
     playbackStateInterval = null;
-    player = new Promise(resolve => {
-        if (window.Spotify) {
+    player = null;
 
-            const player = new window.Spotify.Player({
-                name: 'mySeed',
-                getOAuthToken: cb => { cb(localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN)); },
-                // volume: 0.25
-            });
-
-            player.connect().then(isReady => {
-                if (isReady) {
-
-                    player.addListener('ready', ({ device_id }) => {
-
-                        fetchSpotify('/me/player').then(playbackState => {
-                            if (!playbackState) {
-                                localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, device_id);
-                                this.updatePlayingDevices().then(() => {
-                                    this.setState({ isPlayedLocally: true });
-                                });
-                                return;
-                            }
-
-                            this.setState({
-                                isPlaying: playbackState.is_playing,
-                                progress: playbackState.progress_ms,
-                                duration: playbackState.item.duration_ms,
-                                title: playbackState.item.name,
-                                artist: playbackState.item.artists.map(artist => artist.name).join(', '),
-                                img: playbackState.item.album.images[0].url
-                            });
-
-                            this.toggleProgressInterval();
-                            if (!this.state.isPlayedLocally) this.startFetchPlaybackState();
-                        });
-
-                        player.addListener('player_state_changed', playbackState => {
-                            this.updateState(playbackState)
-                        });
-
-                        player.activateElement();
-
-                        this.getDevices();
-                        resolve(player);
-
-                    });
-                }
-            });
-        }
-    });
+    componentDidMount() {
+        this.player = this.getPlayer();
+    }
 
     componentWillUnmount() {
         this.stopProgressInterval();
         clearInterval(this.playbackStateInterval);
         this.player.then(player => player.disconnect());
+    }
+
+    getPlayer() {
+        return new Promise(resolve => {
+            if (window.Spotify) {
+
+                const player = new window.Spotify.Player({
+                    name: 'mySeed',
+                    getOAuthToken: cb => { cb(localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN)); },
+                    volume: 0.5
+                });
+
+                player.addListener('ready', ({ device_id }) => {
+
+                    fetchSpotify('/me/player').then(playbackState => {
+                        if (!playbackState) {
+                            localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, device_id);
+                            this.updatePlayingDevices().then(() => {
+                                this.setState({ isPlayedLocally: true });
+                            });
+                            return;
+                        }
+
+                        this.setState({
+                            isPlaying: playbackState.is_playing,
+                            progress: playbackState.progress_ms,
+                            duration: playbackState.item.duration_ms,
+                            title: playbackState.item.name,
+                            artist: playbackState.item.artists.map(artist => artist.name).join(', '),
+                            img: playbackState.item.album.images[0].url,
+                            uri: playbackState.item.uri
+                        });
+
+                        this.toggleProgressInterval();
+                        if (!this.state.isPlayedLocally) this.startFetchPlaybackState();
+                    });
+
+                    this.getDevices();
+                });
+
+                player.addListener('player_state_changed', playbackState => {
+                    this.updateState(playbackState)
+                });
+
+                player.activateElement();
+                player.connect();
+                
+                resolve(player);
+            }
+        });
     }
 
     getDevices() {
@@ -117,6 +123,7 @@ class Player extends Component {
             title: currentTrack.name,
             artist: currentTrack.artists.map(artist => artist.name).join(', '),
             img: currentTrack.album.images[0].url,
+            uri: currentTrack.uri,
             isPlayedLocally: true,
         });
 
@@ -151,7 +158,7 @@ class Player extends Component {
 
     updatePlayingDevices() {
         return fetchSpotify('/me/player', { method: 'PUT', body: JSON.stringify({ device_ids: [localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID)] }) })
-            .catch(() => setTimeout(() => this.updatePlayingDevices(), 1000));
+            .catch(() => setTimeout(() => this.updatePlayingDevices(), 2000));
     }
 
     startFetchPlaybackState() {
@@ -171,6 +178,7 @@ class Player extends Component {
                         title: playbackState.item.name,
                         artist: playbackState.item.artists.map(artist => artist.name).join(', '),
                         img: playbackState.item.album.images[0].url,
+                        uri: playbackState.item.uri,
                         isPlayedLocally: false
                     });
                 }
@@ -182,7 +190,8 @@ class Player extends Component {
     play() {
         this.player.then(player => player.activateElement());
         this.startProgressInterval();
-        playSpotify({}).then(() => {
+        console.log(this.state.uri);
+        playSpotify({uris: [this.state.uri], position_ms: this.state.progress}).then(() => {
             if (!this.state.isPlayedLocally) setTimeout(() => this.startFetchPlaybackState(), 500);
         });
     }
