@@ -2,12 +2,11 @@ import { ComputerRounded, DevicesRounded, FavoriteBorderRounded, KeyboardArrowUp
 import { CardMedia, colors, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Slide, Slider, Typography } from '@mui/material';
 import { withStyles } from '@mui/styles';
 import { Box } from '@mui/system';
+import { Component } from 'react';
 import { connect } from 'react-redux';
 import { APP_CONST } from '../../constants';
 import { fetch as fetchSpotify, play as playSpotify } from '../../services/SpotifyServices';
 import theme from '../../theme';
-
-const { Component } = require("react");
 
 class Player extends Component {
 
@@ -36,7 +35,7 @@ class Player extends Component {
 
     componentWillUnmount() {
         this.stopProgressInterval();
-        clearInterval(this.playbackStateInterval);
+        this.stopFetchPlaybackInterval();
         this.player.then(player => player.disconnect());
     }
 
@@ -72,7 +71,7 @@ class Player extends Component {
                         });
 
                         this.toggleProgressInterval();
-                        if (!this.state.isPlayedLocally) this.startFetchPlaybackState();
+                        if (!this.state.isPlayedLocally) this.startFetchPlaybackStateInterval();
                     });
 
                     this.getDevices();
@@ -112,7 +111,7 @@ class Player extends Component {
 
         if (!playerState || !currentTrack) {
             this.setState({ isPlayedLocally: false });
-            this.startFetchPlaybackState();
+            this.startFetchPlaybackStateInterval();
             return;
         }
 
@@ -130,8 +129,7 @@ class Player extends Component {
         this.toggleProgressInterval();
 
         if (this.state.isPlayedLocally) {
-            clearInterval(this.playbackStateInterval);
-            this.playbackStateInterval = null;
+            this.stopFetchPlaybackInterval();
         }
     }
 
@@ -141,7 +139,7 @@ class Player extends Component {
         this.progressInterval = setInterval(() => {
             this.setState({ progress: this.state.progress + 1000 });
             if (this.state.progress >= this.state.duration) {
-                this.startFetchPlaybackState();
+                this.startFetchPlaybackStateInterval();
             }
         }, 1000);
     }
@@ -161,7 +159,25 @@ class Player extends Component {
             .catch(() => setTimeout(() => this.updatePlayingDevices(), 2000));
     }
 
-    startFetchPlaybackState() {
+    fetchPlaybackState() {
+        fetchSpotify('/me/player').then(playbackState => {
+            if (playbackState) {
+                this.setState({
+                    isPlaying: playbackState.is_playing,
+                    progress: playbackState.progress_ms,
+                    duration: playbackState.item.duration_ms,
+                    title: playbackState.item.name,
+                    artist: playbackState.item.artists.map(artist => artist.name).join(', '),
+                    img: playbackState.item.album.images[0].url,
+                    uri: playbackState.item.uri,
+                    isPlayedLocally: false
+                });
+                this.toggleProgressInterval();
+            }
+        });
+    }
+
+    startFetchPlaybackStateInterval() {
         if (this.playbackStateInterval !== null) clearInterval(this.playbackStateInterval);
         this.playbackStateInterval = setInterval(() => {
             if (this.state.isPlayedLocally) {
@@ -169,22 +185,13 @@ class Player extends Component {
                 this.playbackStateInterval = null;
                 return;
             }
-            fetchSpotify('/me/player').then(playbackState => {
-                if (playbackState) {
-                    this.setState({
-                        isPlaying: playbackState.is_playing,
-                        progress: playbackState.progress_ms,
-                        duration: playbackState.item.duration_ms,
-                        title: playbackState.item.name,
-                        artist: playbackState.item.artists.map(artist => artist.name).join(', '),
-                        img: playbackState.item.album.images[0].url,
-                        uri: playbackState.item.uri,
-                        isPlayedLocally: false
-                    });
-                }
-            });
-            this.toggleProgressInterval();
+            this.fetchPlaybackState();
         }, 3000);
+    }
+
+    stopFetchPlaybackInterval() {
+        if (this.playbackStateInterval !== null) clearInterval(this.playbackStateInterval);
+        this.playbackStateInterval = null;
     }
 
     play() {
@@ -192,14 +199,14 @@ class Player extends Component {
         this.startProgressInterval();
         console.log(this.state.uri);
         playSpotify({ uris: [this.state.uri], position_ms: this.state.progress }).then(() => {
-            if (!this.state.isPlayedLocally) setTimeout(() => this.startFetchPlaybackState(), 500);
+            if (!this.state.isPlayedLocally) setTimeout(() => this.startFetchPlaybackStateInterval(), 3000);
         });
     }
 
     pause() {
         this.stopProgressInterval();
         fetchSpotify('/me/player/pause', { method: 'PUT' }).then(() => {
-            if (!this.state.isPlayedLocally) setTimeout(() => this.startFetchPlaybackState(), 500);
+            if (!this.state.isPlayedLocally) setTimeout(() => this.startFetchPlaybackStateInterval(), 3000);
         });
     }
 
@@ -226,8 +233,21 @@ class Player extends Component {
     }
 
     updateProgress(newProgress) {
+        let fetchingPlayerStateInterval = this.playbackStateInterval != null;
+
+        this.stopProgressInterval();
+        if (fetchingPlayerStateInterval) {
+            this.stopFetchPlaybackInterval();
+        }
+
         this.setState({ progress: newProgress });
-        fetchSpotify('/me/player/seek?position_ms=' + newProgress, { method: 'PUT' });
+        fetchSpotify('/me/player/seek?position_ms=' + newProgress, { method: 'PUT' }).then(() => {
+            if (this.state.isPlaying) this.startProgressInterval();
+            setTimeout(() => {
+                if (fetchingPlayerStateInterval) this.startFetchPlaybackStateInterval();
+                else this.fetchPlaybackState()
+            }, 3000);
+        });
     }
 
     render() {
