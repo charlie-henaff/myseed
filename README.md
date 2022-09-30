@@ -43,7 +43,7 @@ After start, application should be available at [localhost:3000](https://localho
     - Cause lyrics speack to me
     - Cause I like the vibes -->
 
-So let's try to create an app that offers new music that users do not know, but that can refer to good times, lyrics that speak to them or musical vibrations liked.
+So let's try to create an app that offers new music that users do not know, but that can refer to good times, lyrics that speak to them or just liked musical vibrations.
 
 <!-- # Modules
 MySeed is like an hub to discover music / streams / videos / art ...  
