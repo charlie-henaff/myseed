@@ -1,6 +1,7 @@
 ![License](https://img.shields.io/github/license/charlie-henaff/myseed)
 
->**Spotify public user**  
+>**Test with a Spotify public user**  
+>url: &emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp;&nbsp; [charlie-henaff.github.io/myseed](https://charlie-henaff.github.io/myseed)  
 >email : &emsp;&emsp;&emsp;&nbsp; myseed@yopmail.com   
 >password : &emsp;&ensp; myseedpwd
 
@@ -11,14 +12,12 @@
 MySeed is a Spotify API-based web UI that helps users discover music  
 It's also a personal project that helps me improve and practice coding  
 
-# How to use ?
-
 ## Requirements 
 
 - [docker](https://www.docker.com/get-started) 
 - [make](https://www.gnu.org/software/make/)
 
-## Uses
+## Usage
 
 ```sh
 make            # show help
