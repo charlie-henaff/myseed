@@ -1,9 +1,8 @@
-import { ComputerRounded, DevicesRounded, FavoriteBorderRounded, KeyboardArrowUpRounded, PauseRounded, PlayArrowRounded } from '@mui/icons-material';
-import { CardMedia, colors, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Slide, Slider, Typography } from '@mui/material';
+import { ComputerRounded, DevicesRounded, KeyboardArrowUpRounded, PauseRounded, PlayArrowRounded, VolumeUpRounded } from '@mui/icons-material';
+import { CardMedia, colors, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Popover, Slide, Slider, Typography } from '@mui/material';
 import { withStyles } from '@mui/styles';
 import { Box } from '@mui/system';
 import { Component } from 'react';
-import { connect } from 'react-redux';
 import { APP_CONST } from '../../constants';
 import { fetch as fetchSpotify, play as playSpotify } from '../../services/SpotifyServices';
 import theme from '../../theme';
@@ -20,6 +19,8 @@ class Player extends Component {
         img: '',
         uri: '',
         url: '',
+        volume: 50,
+        openVolumePopoverAnchor: null,
         devices: {
             list: [],
             openMenuAnchor: null,
@@ -68,7 +69,8 @@ class Player extends Component {
                             title: playbackState.item.name,
                             artist: playbackState.item.artists.map(artist => artist.name).join(', '),
                             img: playbackState.item.album.images[0].url,
-                            uri: playbackState.item.uri
+                            uri: playbackState.item.uri,
+                            volume: playbackState.device.volume_percent
                         });
 
                         this.toggleProgressInterval();
@@ -171,7 +173,8 @@ class Player extends Component {
                     artist: playbackState.item.artists.map(artist => artist.name).join(', '),
                     img: playbackState.item.album.images[0].url,
                     uri: playbackState.item.uri,
-                    isPlayedLocally: false
+                    isPlayedLocally: false,
+                    volume: playbackState.device.volume_percent
                 });
                 this.toggleProgressInterval();
             }
@@ -219,7 +222,6 @@ class Player extends Component {
     openDevicesMenu(event) {
         this.getDevices();
         this.setState({ devices: { ...this.state.devices, openMenuAnchor: event.currentTarget } });
-
     }
 
     clickOnDeviceItem(newDeviceId) {
@@ -256,8 +258,19 @@ class Player extends Component {
         window.open("https://open.spotify.com/" + uri);
     }
 
+    openVolumePopover(event){
+        this.fetchPlaybackState();
+        this.setState({ openVolumePopoverAnchor: event.currentTarget });
+    }
+
+    updateVolume(newVolume) {
+        this.setState({ volume: newVolume });
+        fetchSpotify('/me/player/volume?volume_percent=' + newVolume, { method: 'PUT' }).then(this.setState({openVolumePopoverAnchor: null }));
+    }
+
     render() {
         const isDevicesMenuOpen = Boolean(this.state.devices.openMenuAnchor);
+        const isVolumePopoverOpen = Boolean(this.state.openVolumePopoverAnchor);
         const { classes } = this.props;
         return (
             <Slide direction="up" in={this.state.title.length > 1} mountOnEnter unmountOnExit>
@@ -282,7 +295,8 @@ class Player extends Component {
                                     value={this.state.progress} min={0} max={this.state.duration}
                                     onChange={(event, value) => this.setState({ progress: value })}
                                     onChangeCommitted={(event, value) => this.updateProgress(value)}
-                                    sx={{ height: 4, padding: '0 !important' }} />
+                                    sx={{ height: 4, padding: '0 !important' }}
+                                />
                             </Box>
 
                             <Box className={classes.rightControls}>
@@ -297,8 +311,13 @@ class Player extends Component {
                                         ? <ComputerRounded sx={{ color: 'white' }} />
                                         : <DevicesRounded sx={{ color: theme.palette.secondary.main }} />}
                                 </IconButton>
-                                <IconButton size='small' sx={{ color: 'white' }} >
-                                    <FavoriteBorderRounded sx={{ color: 'white' }} />
+                                <IconButton size='small' sx={{ color: 'white' }}
+                                    aria-controls={isVolumePopoverOpen ? 'volumePopover' : undefined}
+                                    aria-haspopup="true"
+                                    aria-expanded={isVolumePopoverOpen ? 'true' : undefined}
+                                    onClick={event => this.openVolumePopover(event)}
+                                >
+                                    <VolumeUpRounded sx={{ color: 'white' }} />
                                 </IconButton>
                                 <IconButton size='small' sx={{ color: 'white' }} onClick={() => this.togglePlay()}>
                                     {this.state.isPlaying
@@ -308,6 +327,7 @@ class Player extends Component {
                                 </IconButton>
 
                                 {this.devicesMenuRender()}
+                                {this.popupVolumeRender()}
                             </Box>
 
                         </Box>
@@ -318,13 +338,13 @@ class Player extends Component {
     }
 
     devicesMenuRender() {
-        const isDevicesMenuOpen = Boolean(this.state.devices.openMenuAnchor);
+        const open = Boolean(this.state.devices.openMenuAnchor);
         return (
             <Menu
                 id="devicesMenu"
-                open={isDevicesMenuOpen}
-                onClose={() => this.setState({ devices: { ...this.state.devices, openMenuAnchor: null } })}
+                open={open}
                 anchorEl={this.state.devices.openMenuAnchor}
+                onClose={() => this.setState({ devices: { ...this.state.devices, openMenuAnchor: null } })}
                 PaperProps={{
                     elevation: 1,
                     sx: {
@@ -343,6 +363,36 @@ class Player extends Component {
                 )}
             </Menu>
 
+        );
+    }
+
+    popupVolumeRender() {
+        const open = Boolean(this.state.openVolumePopoverAnchor);
+        return (
+            <Popover
+                id='volumePopover'
+                open={open}
+                anchorEl={this.state.openVolumePopoverAnchor}
+                onClose={() => this.setState({ openVolumePopoverAnchor: null })}
+                PaperProps={{
+                    elevation: 1,
+                    sx: {
+                        overflow: 'visible',
+                        filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                        padding: '19px 0 10px 0'
+                    },
+                }}
+                transformOrigin={{ horizontal: 'top', vertical: 'bottom' }}
+                anchorOrigin={{ horizontal: 'left', vertical: 'top' }}
+            >
+                <Slider
+                    orientation='vertical' color='secondary'
+                    value={this.state.volume} min={0} max={100}
+                    onChange={(event, value) => this.setState({ volume: value })}
+                    onChangeCommitted={(event, value) => this.updateVolume(value)}
+                    sx={{ height: '200px' }}
+                />
+            </Popover>
         );
     }
 }
@@ -415,11 +465,4 @@ const styles = (theme) => ({
 
 });
 
-const mapStateToProps = state => {
-    return {};
-};
-
-const mapDispatchToProps = dispatch => ({
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Player));
+export default withStyles(styles)(Player);
