@@ -19,6 +19,7 @@ class Player extends Component {
         artist: '',
         img: '',
         uri: '',
+        url: '',
         devices: {
             list: [],
             openMenuAnchor: null,
@@ -250,6 +251,11 @@ class Player extends Component {
         });
     }
 
+    openSpotifyTrack() {
+        let uri = this.state.uri.split(":").slice(1, 3).join('/');
+        window.open("https://open.spotify.com/" + uri);
+    }
+
     render() {
         const isDevicesMenuOpen = Boolean(this.state.devices.openMenuAnchor);
         const { classes } = this.props;
@@ -262,7 +268,7 @@ class Player extends Component {
                             <Box className={classes.leftControls}>
                                 <CardMedia className={classes.albumCardMedia} image={this.state.img}>
                                     <Box className={classes.albumCardMediaControls}>
-                                        <IconButton className={classes.albumMediaCardBtn} size='small'>
+                                        <IconButton className={classes.albumMediaCardBtn} size='small' onClick={() => this.openSpotifyTrack()}>
                                             <KeyboardArrowUpRounded sx={{ fontSize: '28px', color: 'white' }} />
                                         </IconButton>
                                     </Box>
