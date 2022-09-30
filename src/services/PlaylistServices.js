@@ -1,4 +1,4 @@
-import { fetch as spotifyFetch } from "../SpotifyServices";
+import { fetch as spotifyFetch } from "./SpotifyServices";
 
 export const recommendations = (artistsSeeds = [], tracksSeeds = []) => {
     let params = [

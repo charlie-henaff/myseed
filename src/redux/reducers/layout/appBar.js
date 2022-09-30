@@ -1,7 +1,8 @@
-import {combineReducers} from 'redux';
+import { combineReducers } from 'redux';
 
 export const appBarStates = {
   SEARCH: 'APP_BAR_SEARCH',
+  TITLE: 'APP_BAR_TITLE'
 };
 
 export function search(state = "", action) {
@@ -14,4 +15,14 @@ export function search(state = "", action) {
   }
 }
 
-export default combineReducers({search});
+export function title(state = "", action) {
+  switch (action.type) {
+    case appBarStates.TITLE:
+      return action.title;
+
+    default:
+      return state;
+  }
+}
+
+export default combineReducers({search, title});

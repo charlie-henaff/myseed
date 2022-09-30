@@ -1,11 +1,11 @@
-import React, {Component} from 'react';
 import { withStyles } from '@mui/styles';
-import {connect} from 'react-redux';
-import {APP_CONST} from '../constants';
-import {layoutStates} from "../redux/reducers/layout";
 import { Box } from '@mui/system';
-import store from '../redux/store';
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { APP_CONST } from '../constants';
 import history from '../history';
+import { layoutStates } from "../redux/reducers/layout";
+import store from '../redux/store';
 class Home extends Component {
 
   componentDidMount() {
@@ -13,7 +13,7 @@ class Home extends Component {
       history.push('/login');
     }
 
-    history.push('/music/playlist');
+    history.push('/playlist');
 
     store.dispatch({ type: layoutStates.VISIBLE, visible: true });
     store.dispatch({ type: layoutStates.FULL_SIZE_CONTENT, fullSizeContent: false });

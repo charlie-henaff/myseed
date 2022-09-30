@@ -1,18 +1,18 @@
-import SwipeableDrawer from '@mui/material/SwipeableDrawer';
+import { RadioRounded as RadioIcon } from '@mui/icons-material';
 import Box from '@mui/material/Box';
-import React, {Component} from 'react';
 import Button from '@mui/material/Button';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import Typography from '@mui/material/Typography';
 import { withStyles } from '@mui/styles';
-import {HomeRounded as HomeIcon} from '@mui/icons-material';
-import {connect} from 'react-redux';
-import {drawerStates} from '../../redux/reducers/layout/drawer';
 import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import history from '../../history';
+import { drawerStates } from '../../redux/reducers/layout/drawer';
 import { logout } from '../../services/LoginServices';
 
 class Drawer extends Component {
@@ -54,8 +54,8 @@ class Drawer extends Component {
           </Box>
           <List className={classes.menu}>
             <ListItem button key="drawer_home" onClick={() => changeDestination('/')}>
-              <ListItemIcon><HomeIcon color="inherit"/></ListItemIcon>
-              <ListItemText primary="Accueil"/>
+              <ListItemIcon><RadioIcon color="inherit"/></ListItemIcon>
+              <ListItemText primary="Playlist"/>
             </ListItem>
           </List>
         </SwipeableDrawer>

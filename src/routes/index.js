@@ -1,11 +1,11 @@
-import { Route } from 'react-router-dom';
-import { Redirect } from 'react-router';
 import React from 'react';
-import Login from '../components/Login';
+import { Redirect } from 'react-router';
+import { Route } from 'react-router-dom';
 import Home from '../components/Home';
+import Login from '../components/Login';
+import Playlist from '../components/Playlist';
 import SearchResult from '../components/Search';
-import {logged} from '../services/LoginServices';
-import MusicPlaylist from '../components/Music/MusicPlaylist';
+import { logged } from '../services/LoginServices';
 
 function LoginCheckedRoute({ component: Component, authed, ...rest }) {
   return (
@@ -23,5 +23,5 @@ export default [
   <Route path="/login" key="route_login" component={Login} />,
   <LoginCheckedRoute path="/" key="route_home" exact component={Home} />,
   <LoginCheckedRoute path="/search" key="route_search" component={SearchResult} />,
-  <LoginCheckedRoute path="/music/playlist" key="route_music_playlist" exact component={MusicPlaylist} />,
+  <LoginCheckedRoute path="/playlist" key="route_playlist" exact component={Playlist} />,
 ];
