@@ -84,7 +84,7 @@ class Player extends Component {
 
                 player.activateElement();
                 player.connect();
-                
+
                 resolve(player);
             }
         });
@@ -191,7 +191,7 @@ class Player extends Component {
         this.player.then(player => player.activateElement());
         this.startProgressInterval();
         console.log(this.state.uri);
-        playSpotify({uris: [this.state.uri], position_ms: this.state.progress}).then(() => {
+        playSpotify({ uris: [this.state.uri], position_ms: this.state.progress }).then(() => {
             if (!this.state.isPlayedLocally) setTimeout(() => this.startFetchPlaybackState(), 500);
         });
     }
@@ -225,6 +225,11 @@ class Player extends Component {
         }));
     }
 
+    updateProgress(newProgress) {
+        this.setState({ progress: newProgress });
+        fetchSpotify('/me/player/seek?position_ms=' + newProgress, { method: 'PUT' });
+    }
+
     render() {
         const isDevicesMenuOpen = Boolean(this.state.devices.openMenuAnchor);
         const { classes } = this.props;
@@ -247,7 +252,11 @@ class Player extends Component {
                             <Box className={classes.mediaData}>
                                 <Typography variant='body2' noWrap >{this.state.title}</Typography>
                                 <Typography variant='caption' noWrap >{this.state.artist}</Typography>
-                                <Slider size="small" value={this.state.progress} min={0} max={this.state.duration} color='secondary' sx={{ height: 4, padding: '0 !important' }} />
+                                <Slider size="small" color='secondary'
+                                    value={this.state.progress} min={0} max={this.state.duration}
+                                    onChange={(event, value) => this.setState({ progress: value })}
+                                    onChangeCommitted={(event, value) => this.updateProgress(value)}
+                                    sx={{ height: 4, padding: '0 !important' }} />
                             </Box>
 
                             <Box className={classes.rightControls}>
