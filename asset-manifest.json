@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "https://charlie-henaff.github.io/myseed/static/css/main.43ce69ef.css",
-    "main.js": "https://charlie-henaff.github.io/myseed/static/js/main.9f7df1cb.js",
+    "main.js": "https://charlie-henaff.github.io/myseed/static/js/main.b978f294.js",
     "static/media/man_listening_music_in_sleeping.jpg": "https://charlie-henaff.github.io/myseed/static/media/man_listening_music_in_sleeping.7e55c57dc59e6e97f493.jpg",
     "static/media/woman_looking_through_records_at_vinyl_shop.jpg": "https://charlie-henaff.github.io/myseed/static/media/woman_looking_through_records_at_vinyl_shop.a244399618327e4e877a.jpg",
     "static/media/roboto-all-500-normal.woff": "https://charlie-henaff.github.io/myseed/static/media/roboto-all-500-normal.52cb737b682eb9661ee1.woff",
@@ -38,10 +38,10 @@
     "static/media/roboto-greek-ext-700-normal.woff2": "https://charlie-henaff.github.io/myseed/static/media/roboto-greek-ext-700-normal.9674bc0ae12c2551d9d1.woff2",
     "index.html": "https://charlie-henaff.github.io/myseed/index.html",
     "main.43ce69ef.css.map": "https://charlie-henaff.github.io/myseed/static/css/main.43ce69ef.css.map",
-    "main.9f7df1cb.js.map": "https://charlie-henaff.github.io/myseed/static/js/main.9f7df1cb.js.map"
+    "main.b978f294.js.map": "https://charlie-henaff.github.io/myseed/static/js/main.b978f294.js.map"
   },
   "entrypoints": [
     "static/css/main.43ce69ef.css",
-    "static/js/main.9f7df1cb.js"
+    "static/js/main.b978f294.js"
   ]
 }
