@@ -22,10 +22,24 @@ export const fetch = (uri, options = {}) => {
     options.headers.set('Content-Type', 'MIME_TYPE');
   }
 
+  let currentDeviceId = localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID);
+  if (currentDeviceId === "undefined") currentDeviceId = null;
+
+  // add current device_id parameter on all ../player/.. post or put request
+  if (
+    currentDeviceId != null &&
+    options?.method != null &&
+    ['post', 'put'].find(item => item == options.method.toLowerCase()) != null &&
+    uri.includes("player") &&
+    uri.split('/').pop() != "player"
+  ) {
+    uri = uri + (uri.includes('?') ? '&' : '?') + 'device_id=' + currentDeviceId;
+  }
+
   return global.fetch(new URL(process.env.REACT_APP_SPOTIFY_API_ENDPOINT + uri), options)
     .then(response => {
       if (response.status === 202) return true;
-      if (response.status === 204) return ''; 
+      if (response.status === 204) return '';
       if (response.status === 401) {
         options.headers.delete('Authorization');
         return refreshToken().then(() => fetch(uri, options));
@@ -38,12 +52,6 @@ export const fetch = (uri, options = {}) => {
           () => { throw new Error(response.statusText || 'An error occurred.'); }
         );
     });
-}
-
-export const play = (body) => {
-  let currentDeviceId = localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID);
-  if (currentDeviceId === "undefined") currentDeviceId = null;
-  return fetch('/me/player/play' + (currentDeviceId ? "?device_id=" + currentDeviceId : ''), { method: 'PUT', body: JSON.stringify(body) });
 }
 
 export const auth = () => {
