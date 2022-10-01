@@ -4,7 +4,7 @@ import { withStyles } from '@mui/styles';
 import { Box } from '@mui/system';
 import { Component } from 'react';
 import { APP_CONST } from '../../constants';
-import { fetch as fetchSpotify, play as playSpotify } from '../../services/SpotifyServices';
+import { fetch as spotifyFetch } from '../../services/SpotifyServices';
 import theme from '../../theme';
 
 class Player extends Component {
@@ -30,6 +30,7 @@ class Player extends Component {
     progressInterval = null;
     playbackStateInterval = null;
     player = null;
+    localPlayerId = null;
 
     componentDidMount() {
         this.player = this.getPlayer();
@@ -52,11 +53,12 @@ class Player extends Component {
                 });
 
                 player.addListener('ready', ({ device_id }) => {
+                    this.localPlayerId = device_id;
 
-                    fetchSpotify('/me/player').then(playbackState => {
+                    spotifyFetch('/me/player').then(playbackState => {
                         if (!playbackState) {
-                            localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, device_id);
-                            this.updatePlayingDevices().then(() => {
+                            this.updatePlayingDevices(device_id).then(() => {
+                                localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, device_id);
                                 this.setState({ isPlayedLocally: true });
                             });
                             return;
@@ -87,18 +89,18 @@ class Player extends Component {
                 player.activateElement();
                 player.connect();
 
-                resolve(player);
+                setTimeout(() => resolve(player), 1000);
             }
         });
     }
 
     getDevices() {
-        fetchSpotify('/me/player/devices').then(res => {
+        spotifyFetch('/me/player/devices').then(res => {
             if (res?.devices) {
-                const activeDevice = res.devices.find(device => device.is_active);
-                if (activeDevice && activeDevice !== "undefined" && activeDevice.id) {
-                    localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, activeDevice.id);
-                }
+                // const activeDevice = res.devices.find(device => device.is_active);
+                // if (activeDevice && activeDevice !== "undefined" && activeDevice.id) {
+                //     localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, activeDevice.id);
+                // }
                 this.setState({
                     devices: {
                         ...this.state.devices,
@@ -118,6 +120,8 @@ class Player extends Component {
             return;
         }
 
+        this.stopFetchPlaybackInterval();
+
         this.setState({
             isPlaying: !playerState.paused,
             progress: playerState.position,
@@ -130,10 +134,6 @@ class Player extends Component {
         });
 
         this.toggleProgressInterval();
-
-        if (this.state.isPlayedLocally) {
-            this.stopFetchPlaybackInterval();
-        }
     }
 
     startProgressInterval() {
@@ -157,13 +157,13 @@ class Player extends Component {
         else this.stopProgressInterval();
     }
 
-    updatePlayingDevices() {
-        return fetchSpotify('/me/player', { method: 'PUT', body: JSON.stringify({ device_ids: [localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID)] }) })
-            .catch(() => setTimeout(() => this.updatePlayingDevices(), 2000));
+    updatePlayingDevices(device_id) {
+        return spotifyFetch('/me/player', { method: 'PUT', body: JSON.stringify({ device_ids: [device_id] }) })
+            .catch(() => setTimeout(() => this.updatePlayingDevices(device_id), 2000));
     }
 
     fetchPlaybackState() {
-        fetchSpotify('/me/player').then(playbackState => {
+        spotifyFetch('/me/player').then(playbackState => {
             if (playbackState) {
                 this.setState({
                     isPlaying: playbackState.is_playing,
@@ -173,7 +173,7 @@ class Player extends Component {
                     artist: playbackState.item.artists.map(artist => artist.name).join(', '),
                     img: playbackState.item.album.images[0].url,
                     uri: playbackState.item.uri,
-                    isPlayedLocally: false,
+                    isPlayedLocally: playbackState.device.id === this.localPlayerId,
                     volume: playbackState.device.volume_percent
                 });
                 this.toggleProgressInterval();
@@ -201,17 +201,15 @@ class Player extends Component {
     play() {
         this.player.then(player => player.activateElement());
         this.startProgressInterval();
-        console.log(this.state.uri);
-        playSpotify({ uris: [this.state.uri], position_ms: this.state.progress }).then(() => {
-            if (!this.state.isPlayedLocally) setTimeout(() => this.startFetchPlaybackStateInterval(), 3000);
-        });
+
+        spotifyFetch('/me/player/play', { method: 'PUT', body: JSON.stringify({ uris: [this.state.uri], position_ms: this.state.progress }) })
+            .then(() => { if (!this.state.isPlayedLocally) setTimeout(() => this.startFetchPlaybackStateInterval(), 3000); });
     }
 
     pause() {
         this.stopProgressInterval();
-        fetchSpotify('/me/player/pause', { method: 'PUT' }).then(() => {
-            if (!this.state.isPlayedLocally) setTimeout(() => this.startFetchPlaybackStateInterval(), 3000);
-        });
+        spotifyFetch('/me/player/pause', { method: 'PUT' })
+            .then(() => { if (!this.state.isPlayedLocally) setTimeout(() => this.startFetchPlaybackStateInterval(), 3000); });
     }
 
     togglePlay() {
@@ -225,17 +223,21 @@ class Player extends Component {
     }
 
     clickOnDeviceItem(newDeviceId) {
-        this.player.then(player => player.activateElement());
-        localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, newDeviceId);
-        this.updatePlayingDevices().then(() => this.setState({
-            devices: {
-                ...this.state.devices,
-                openMenuAnchor: null
-            }
-        }));
+        this.pause();
+        setTimeout(() => this.updatePlayingDevices(newDeviceId).then(() => {
+            localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, newDeviceId);
+            this.setState({
+                devices: {
+                    ...this.state.devices,
+                    openMenuAnchor: null
+                }
+            });
+            setTimeout(() => this.play(), 1000);
+        }), 1000);
     }
 
     updateProgress(newProgress) {
+        console.log('update progress');
         let fetchingPlayerStateInterval = this.playbackStateInterval != null;
 
         this.stopProgressInterval();
@@ -244,7 +246,7 @@ class Player extends Component {
         }
 
         this.setState({ progress: newProgress });
-        fetchSpotify('/me/player/seek?position_ms=' + newProgress, { method: 'PUT' }).then(() => {
+        spotifyFetch('/me/player/seek?position_ms=' + newProgress, { method: 'PUT' }).then(() => {
             if (this.state.isPlaying) this.startProgressInterval();
             setTimeout(() => {
                 if (fetchingPlayerStateInterval) this.startFetchPlaybackStateInterval();
@@ -258,14 +260,16 @@ class Player extends Component {
         window.open("https://open.spotify.com/" + uri);
     }
 
-    openVolumePopover(event){
-        this.fetchPlaybackState();
+    openVolumePopover(event) {
         this.setState({ openVolumePopoverAnchor: event.currentTarget });
     }
 
     updateVolume(newVolume) {
         this.setState({ volume: newVolume });
-        fetchSpotify('/me/player/volume?volume_percent=' + newVolume, { method: 'PUT' }).then(this.setState({openVolumePopoverAnchor: null }));
+        spotifyFetch('/me/player/volume?volume_percent=' + newVolume, { method: 'PUT' })
+            .then(() => {
+                this.setState({ openVolumePopoverAnchor: null })
+            });
     }
 
     render() {
