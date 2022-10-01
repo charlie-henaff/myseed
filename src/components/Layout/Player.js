@@ -89,7 +89,7 @@ class Player extends Component {
                 player.activateElement();
                 player.connect();
 
-                setTimeout(resolve(player), 1000);
+                setTimeout(() => resolve(player), 1000);
             }
         });
     }
@@ -203,16 +203,13 @@ class Player extends Component {
         this.startProgressInterval();
 
         spotifyFetch('/me/player/play', { method: 'PUT', body: JSON.stringify({ uris: [this.state.uri], position_ms: this.state.progress }) })
-            .then(() => {
-                if (!this.state.isPlayedLocally) setTimeout(() => this.startFetchPlaybackStateInterval(), 3000);
-            });
+            .then(() => { if (!this.state.isPlayedLocally) setTimeout(() => this.startFetchPlaybackStateInterval(), 3000); });
     }
 
     pause() {
         this.stopProgressInterval();
-        spotifyFetch('/me/player/pause', { method: 'PUT' }).then(() => {
-            if (!this.state.isPlayedLocally) setTimeout(() => this.startFetchPlaybackStateInterval(), 3000);
-        });
+        spotifyFetch('/me/player/pause', { method: 'PUT' })
+            .then(() => { if (!this.state.isPlayedLocally) setTimeout(() => this.startFetchPlaybackStateInterval(), 3000); });
     }
 
     togglePlay() {
@@ -227,7 +224,7 @@ class Player extends Component {
 
     clickOnDeviceItem(newDeviceId) {
         this.pause();
-        setTimeout(this.updatePlayingDevices(newDeviceId).then(() => {
+        setTimeout(() => this.updatePlayingDevices(newDeviceId).then(() => {
             localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, newDeviceId);
             this.setState({
                 devices: {
@@ -235,11 +232,12 @@ class Player extends Component {
                     openMenuAnchor: null
                 }
             });
-            setTimeout(this.play(), 1000);
+            setTimeout(() => this.play(), 1000);
         }), 1000);
     }
 
     updateProgress(newProgress) {
+        console.log('update progress');
         let fetchingPlayerStateInterval = this.playbackStateInterval != null;
 
         this.stopProgressInterval();
@@ -263,14 +261,15 @@ class Player extends Component {
     }
 
     openVolumePopover(event) {
-        this.fetchPlaybackState();
         this.setState({ openVolumePopoverAnchor: event.currentTarget });
     }
 
     updateVolume(newVolume) {
         this.setState({ volume: newVolume });
         spotifyFetch('/me/player/volume?volume_percent=' + newVolume, { method: 'PUT' })
-            .then(this.setState({ openVolumePopoverAnchor: null }));
+            .then(() => {
+                this.setState({ openVolumePopoverAnchor: null })
+            });
     }
 
     render() {
