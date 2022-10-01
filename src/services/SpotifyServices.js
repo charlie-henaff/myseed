@@ -29,9 +29,9 @@ export const fetch = (uri, options = {}) => {
   if (
     currentDeviceId != null &&
     options?.method != null &&
-    ['post', 'put'].find(item => item == options.method.toLowerCase()) != null &&
+    ['post', 'put'].find(item => item === options.method.toLowerCase()) != null &&
     uri.includes("player") &&
-    uri.split('/').pop() != "player"
+    uri.split('/').pop() !== "player"
   ) {
     uri = uri + (uri.includes('?') ? '&' : '?') + 'device_id=' + currentDeviceId;
   }

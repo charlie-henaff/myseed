@@ -97,7 +97,7 @@ class Player extends Component {
     getDevices() {
         spotifyFetch('/me/player/devices').then(res => {
             if (res?.devices) {
-                const activeDevice = res.devices.find(device => device.is_active);
+                // const activeDevice = res.devices.find(device => device.is_active);
                 // if (activeDevice && activeDevice !== "undefined" && activeDevice.id) {
                 //     localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, activeDevice.id);
                 // }
