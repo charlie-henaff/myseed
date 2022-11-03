@@ -1,8 +1,9 @@
 {
-  "short_name": "mySeed",
   "name": "mySeed",
-  "start_url": ".",
-  "display": "fullscreen",
+  "short_name": "mySeed",
+  "start_url": "charlie-henaff.github.io/myseed",
+  "display": "standalone",
   "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "background_color": "#ffffff",
+  "orientation": "portrait-primary",
 }
