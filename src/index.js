@@ -8,6 +8,7 @@ import { ConnectedRouter } from 'connected-react-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
+import Install from './components/Install';
 import LayoutComponent from './components/Layout/Layout';
 import history from './history';
 import store from './redux/store';
@@ -20,6 +21,7 @@ ReactDOM.render(
             <CssBaseline />
             <ThemeProvider theme={theme}>
                 <LayoutComponent />
+                <Install/>
             </ThemeProvider>
         </ConnectedRouter>
     </Provider>,
