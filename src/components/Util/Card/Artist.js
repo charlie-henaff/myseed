@@ -23,7 +23,7 @@ class Artist extends Component {
     render() {
         const {classes} = this.props;
         const {name, avatarUrl, onCardClick} = this.props;
-        const {hover, detailOpened} = this.state;
+        const {hover} = this.state;
 
         const setHover = (value) => {
             this.setState({hover: value});
@@ -31,7 +31,7 @@ class Artist extends Component {
 
         return (
             <>
-                <Grid item xs={detailOpened ? 12 : 6} sm={detailOpened ? 12 : 4} md={detailOpened ? 12 : 2}>
+                <Grid item xs={6} sm={4} md={2} xl={1}>
                     <Card className={classes.root}
                           onMouseOver={() => setHover(true)}
                           onMouseOut={() => setHover(false)}

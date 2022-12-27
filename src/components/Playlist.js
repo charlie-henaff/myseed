@@ -68,7 +68,7 @@ class Playlist extends Component {
     return (
       <>
         {playlistLoading && <LinearProgress color="secondary" />}
-        <Container maxWidth={'xl'}>
+        <Container maxWidth={false}>
           {playlistLoading || !tracks ? "" : (
             <Box py={2}>
               <Grid container spacing={2}>
