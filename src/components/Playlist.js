@@ -8,7 +8,7 @@ import { APP_CONST } from '../constants';
 import history from '../history';
 import { layoutStates } from "../redux/reducers/layout";
 import { appBarStates } from '../redux/reducers/layout/appBar';
-import { playerState } from '../redux/reducers/layout/player';
+import { spotifyPlayerState } from '../redux/reducers/layout/spotifyPlayer';
 import { playlistStates } from '../redux/reducers/playlist';
 import store from '../redux/store';
 import { topsRecommendations } from '../services/PlaylistServices';
@@ -19,9 +19,12 @@ import Artist from './Util/Card/Artist';
 class Playlist extends Component {
 
   static propTypes = {
-    isLoading: PropTypes.bool,
+    playlistLoading: PropTypes.bool,
     tracks: PropTypes.array,
-    playing: PropTypes.object,
+  };
+
+  state = {
+    lastTracks: null
   };
 
   componentDidMount() {
@@ -39,39 +42,38 @@ class Playlist extends Component {
   componentDidUpdate(prevProps, prevState) {
     const { tracks } = this.props;
     if (tracks && tracks !== prevProps.tracks) {
-      store.dispatch({ type: playerState.VISIBLE, visible: true });
-      store.dispatch({ type: playerState.URIS, uris: tracks.map(track => track.uri) });
+      store.dispatch({ type: spotifyPlayerState.VISIBLE, visible: true });
+      store.dispatch({ type: spotifyPlayerState.URIS, uris: tracks.map(track => track.uri) });
     }
   }
 
   componentWillUnmount() {
-    store.dispatch({ type: playerState.VISIBLE, visible: false });
+    store.dispatch({ type: spotifyPlayerState.VISIBLE, visible: false });
   }
 
   startPLaylistHere(trackIndex) {
-    const { tracks } = this.props;
-    spotifyFetch('/me/player/play', { method: 'put', body: JSON.stringify({ uris: [tracks[trackIndex].uri] }) });
-    store.dispatch({ type: playerState.URIS, uris: tracks.slice(trackIndex + 1).map(track => track.uri) });
+    spotifyFetch('/me/player/play', { method: 'put', body: JSON.stringify({ uris: [this.props.tracks[trackIndex].uri] }) });
+
+    // NOT WORKING : Cannot manage queue properly
+    // let timeout = 1000;
+    // this.props.tracks.slice(trackIndex + 1).forEach(track => {
+    //   setTimeout(() => fetchSpotify('/me/player/queue?uri=' + track.uri, { method: 'POST' }), timeout);
+    //   timeout = timeout + 1000;
+    // });
   }
 
   render() {
-    const { isLoading, tracks, playing } = this.props;
+    const { playlistLoading, tracks } = this.props;
 
     return (
       <>
-        {isLoading && <LinearProgress color="secondary" />}
+        {playlistLoading && <LinearProgress color="secondary" />}
         <Container maxWidth={false}>
-          {isLoading || !tracks ? "" : (
+          {playlistLoading || !tracks ? "" : (
             <Box py={2}>
               <Grid container spacing={2}>
                 {tracks.map((item, index) => {
-                  return <Artist
-                    name={item.name}
-                    avatarUrl={item.album?.images[1].url}
-                    key={"artist_" + item.id}
-                    onCardClick={() => this.startPLaylistHere(index)}
-                    selected={playing && playing.id === item.id}
-                  />
+                  return <Artist name={item.name} avatarUrl={item.album?.images[1].url} key={"artist_" + item.id} onCardClick={() => this.startPLaylistHere(index)} />
                 })}
               </Grid>
             </Box>
@@ -99,11 +101,10 @@ const getTopRecomendations = () => {
 };
 
 const mapStateToProps = state => {
-  const isLoading = state.app.playlist.loading;
+  const playlistLoading = state.app.playlist.loading;
   const tracks = state.app.playlist.result;
-  const error = state.app.playlist.error;
-  const playing = state.app.layout.player.playing;
-  return { isLoading, tracks, error, playing };
+  const playlistError = state.app.playlist.error;
+  return { playlistLoading, tracks, playlistError };
 };
 
 const mapDispatchToProps = dispatch => ({

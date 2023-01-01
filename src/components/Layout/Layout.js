@@ -48,7 +48,8 @@ const styles = (theme) => ({
 
 const mapStateToProps = state => {
     const layoutVisible = state.app.layout.visible;
-    const showPlayer = state.app.layout.player.visible;
+    const showPlayer = state.app.layout.spotifyPlayer.visible;
+    // const spotfyPlayerUris = state.app.layout.spotifyPlayer.uris;
     return { layoutVisible, showPlayer };
 };
 
