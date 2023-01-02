@@ -50,6 +50,5 @@
     ],
     "theme_color": "#ffffff",
     "background_color": "#ffffff",
-    "start_url": "https://github.com/charlie-henaff/myseed",
     "display": "standalone"
 }
