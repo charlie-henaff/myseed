@@ -2,7 +2,7 @@ import { combineReducers } from 'redux';
 
 export const playerState = {
     VISIBLE: 'LAYOUT_PLAYER_VISIBLE',
-    URIS: 'LAYOUT_PLAYER_URIS',
+    NEXT_URIS: 'LAYOUT_PLAYER_NEXT_URIS',
     PLAYING: 'LAYOUT_PLAYER_PLAYING'
 };
 
@@ -15,10 +15,10 @@ export function visible(state = false, action) {
     }
 }
 
-export function uris(state = [], action) {
+export function nextUris(state = [], action) {
     switch (action.type) {
         case playerState.URIS:
-            return action.uris;
+            return action.nextUris;
         default:
             return state;
     }
@@ -33,4 +33,4 @@ export function playing(state = null, action) {
     }
 }
 
-export default combineReducers({ visible, uris, playing});
+export default combineReducers({ visible, nextUris, playing });

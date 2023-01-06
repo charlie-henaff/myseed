@@ -3,7 +3,9 @@ import { APP_CONST } from "../constants";
 const spotify_client_scopes = 'streaming user-read-email user-read-private user-library-read user-library-modify user-top-read user-read-playback-state user-modify-playback-state';
 const spotify_login_callback = process.env.REACT_APP_BASE_URL + '/login';
 
-export const fetch = (uri, options = {}) => {
+const MAX_NB_TRY = 3;
+
+export const fetch = (uri, options = {}, currentTry = 0) => {
   if ('undefined' === typeof options.headers) options.headers = new Headers();
 
   if (null === options.headers.get('Authorization') && localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN)) {
@@ -44,7 +46,7 @@ export const fetch = (uri, options = {}) => {
         options.headers.delete('Authorization');
         return refreshToken().then(() => fetch(uri, options));
       }
-      if (response.status === 502) return fetch(uri, options);
+      if (response.status === 502 && currentTry < MAX_NB_TRY) return fetch(uri, options, ++currentTry);
       if (response.ok) return response.json();
       return response.json()
         .then(

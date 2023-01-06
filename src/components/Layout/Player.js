@@ -2,14 +2,24 @@ import { ComputerRounded, DevicesRounded, KeyboardArrowUpRounded, PauseRounded, 
 import { CardMedia, colors, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Popover, Slide, Slider, Typography } from '@mui/material';
 import { withStyles } from '@mui/styles';
 import { Box } from '@mui/system';
+import PropTypes from 'prop-types';
 import { Component } from 'react';
+import { connect } from 'react-redux';
 import { APP_CONST } from '../../constants';
+import { playerState } from '../../redux/reducers/layout/player';
 import { fetch as spotifyFetch } from '../../services/SpotifyServices';
 import theme from '../../theme';
 
 class Player extends Component {
 
+    static propTypes = {
+        nextUris: PropTypes.array,
+        updatePlaying: PropTypes.func.isRequired,
+        setPlayerNextUris: PropTypes.func.isRequired,
+    };
+
     state = {
+        isReady: false,
         isPlaying: false,
         isPlayedLocally: false,
         progress: 0,
@@ -36,6 +46,18 @@ class Player extends Component {
         this.player = this.getPlayer();
     }
 
+    componentDidUpdate(prevProps, prevState){
+        if (prevState.progress != this.state.update){
+            if (this.state.update >= this.state.duration){
+                const{nextUris, setPlayerNextUris}=this.props;
+                if (nextUris[0]){
+                    spotifyFetch('/me/player/play', { method: 'put', body: JSON.stringify({ uris: [nextUris[0]] }) });
+                    setPlayerNextUris(nextUris.slice(1));
+                }
+            }
+        }
+    }
+    
     componentWillUnmount() {
         this.stopProgressInterval();
         this.stopFetchPlaybackInterval();
@@ -44,53 +66,58 @@ class Player extends Component {
 
     getPlayer() {
         return new Promise(resolve => {
-            if (window.Spotify) {
 
-                const player = new window.Spotify.Player({
-                    name: 'mySeed',
-                    getOAuthToken: cb => { cb(localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN)); },
-                    volume: 0.5
-                });
+            if (!window.Spotify) {
+                setTimeout(() => this.getPlayer(), 1000);
+                return;
+            }
 
-                player.addListener('ready', ({ device_id }) => {
-                    this.localPlayerId = device_id;
+            const player = new window.Spotify.Player({
+                name: 'mySeed',
+                getOAuthToken: cb => { cb(localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN)); },
+                volume: 0.5
+            });
 
-                    spotifyFetch('/me/player').then(playbackState => {
-                        if (!playbackState) {
-                            this.updatePlayingDevices(device_id).then(() => {
-                                localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, device_id);
-                                this.setState({ isPlayedLocally: true });
-                            });
-                            return;
-                        }
+            player.addListener('ready', ({ device_id }) => {
+                this.localPlayerId = device_id;
 
-                        this.setState({
-                            isPlaying: playbackState.is_playing,
-                            progress: playbackState.progress_ms,
-                            duration: playbackState.item.duration_ms,
-                            title: playbackState.item.name,
-                            artist: playbackState.item.artists.map(artist => artist.name).join(', '),
-                            img: playbackState.item.album.images[0].url,
-                            uri: playbackState.item.uri,
-                            volume: playbackState.device.volume_percent
+                spotifyFetch('/me/player').then(playbackState => {
+                    if (!playbackState) {
+                        this.updatePlayingDevices(device_id).finally(() => {
+                            localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, device_id);
+                            this.setState({ isPlayedLocally: true });
                         });
+                        return;
+                    }
 
-                        this.toggleProgressInterval();
-                        if (!this.state.isPlayedLocally) this.startFetchPlaybackStateInterval();
+                    this.setState({
+                        isPlaying: playbackState.is_playing,
+                        progress: playbackState.progress_ms,
+                        duration: playbackState.item.duration_ms,
+                        title: playbackState.item.name,
+                        artist: playbackState.item.artists.map(artist => artist.name).join(', '),
+                        img: playbackState.item.album.images[0].url,
+                        uri: playbackState.item.uri,
+                        volume: playbackState.device.volume_percent
                     });
 
-                    this.getDevices();
+                    this.toggleProgressInterval();
+                    if (!this.state.isPlayedLocally) this.startFetchPlaybackStateInterval();
+                }).finally(() => {
+                    this.setState({ isReady: true });
                 });
 
-                player.addListener('player_state_changed', playbackState => {
-                    this.updateState(playbackState)
-                });
+                this.getDevices();
+            });
 
-                player.activateElement();
-                player.connect();
+            player.addListener('player_state_changed', playbackState => {
+                this.updateState(playbackState)
+            });
 
-                setTimeout(() => resolve(player), 1000);
-            }
+            player.activateElement();
+            player.connect();
+
+            setTimeout(() => resolve(player), 1000);
         });
     }
 
@@ -158,8 +185,8 @@ class Player extends Component {
     }
 
     updatePlayingDevices(device_id) {
-        return spotifyFetch('/me/player', { method: 'PUT', body: JSON.stringify({ device_ids: [device_id] }) })
-            .catch(() => setTimeout(() => this.updatePlayingDevices(device_id), 2000));
+        return spotifyFetch('/me/player', { method: 'PUT', body: JSON.stringify({ device_ids: [device_id] }) });
+        // .catch(() => setTimeout(() => this.updatePlayingDevices(device_id), 2000));
     }
 
     fetchPlaybackState() {
@@ -237,7 +264,6 @@ class Player extends Component {
     }
 
     updateProgress(newProgress) {
-        console.log('update progress');
         let fetchingPlayerStateInterval = this.playbackStateInterval != null;
 
         this.stopProgressInterval();
@@ -277,24 +303,26 @@ class Player extends Component {
         const isVolumePopoverOpen = Boolean(this.state.openVolumePopoverAnchor);
         const { classes } = this.props;
         return (
-            <Slide direction="up" in={this.state.title.length > 1} mountOnEnter unmountOnExit>
+            <Slide direction="up" in={this.state.isReady} mountOnEnter unmountOnExit>
                 <Box className={classes.root}>
                     <Box className={classes.shape}>
                         <Box className={classes.content}>
 
-                            <Box className={classes.leftControls}>
-                                <CardMedia className={classes.albumCardMedia} image={this.state.img}>
-                                    <Box className={classes.albumCardMediaControls}>
-                                        <IconButton className={classes.albumMediaCardBtn} size='small' onClick={() => this.openSpotifyTrack()}>
-                                            <KeyboardArrowUpRounded sx={{ fontSize: '28px', color: 'white' }} />
-                                        </IconButton>
-                                    </Box>
-                                </CardMedia>
-                            </Box>
+                            {this.state.img &&
+                                <Box className={classes.leftControls}>
+                                    <CardMedia className={classes.albumCardMedia} image={this.state.img}>
+                                        <Box className={classes.albumCardMediaControls}>
+                                            <IconButton className={classes.albumMediaCardBtn} size='small' onClick={() => this.openSpotifyTrack()}>
+                                                <KeyboardArrowUpRounded sx={{ fontSize: '28px', color: 'white' }} />
+                                            </IconButton>
+                                        </Box>
+                                    </CardMedia>
+                                </Box>
+                            }
 
-                            <Box className={classes.mediaData}>
-                                <Typography variant='body2' noWrap >{this.state.title}</Typography>
-                                <Typography variant='caption' noWrap >{this.state.artist}</Typography>
+                            <Box className={classes.mediaData} pl={!this.state.img ? 3 : 1}>
+                                <Typography variant='body2' noWrap >{this.state.title ? this.state.title : 'Bonnes découvertes'}</Typography>
+                                <Typography variant='caption' noWrap >{this.state.artist ? this.state.artist : 'Choisissez un titre pour commencer votre voyage musical'}</Typography>
                                 <Slider size="small" color='secondary'
                                     value={this.state.progress} min={0} max={this.state.duration}
                                     onChange={(event, value) => this.setState({ progress: value })}
@@ -469,4 +497,14 @@ const styles = (theme) => ({
 
 });
 
-export default withStyles(styles)(Player);
+const mapStateToProps = state => {
+    const nextUris = state.app.layout.player.nextUris;
+    return { nextUris };
+};
+
+const mapDispatchToProps = dispatch => ({
+    updatePlaying: track => dispatch({ type: playerState.PLAYING, playing: track }),
+    setPlayerNextUris: uris => dispatch({ type: playerState.NEXT_URIS, nextUris: uris })
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Player));
