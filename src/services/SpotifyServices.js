@@ -96,6 +96,12 @@ export const refreshToken = () => {
   return global.fetch('https://accounts.spotify.com/api/token', { method: 'post', headers: header, body: body })
     .then(response => response.json())
     .then(data => {
+      if (data.error_description){
+        localStorage.removeItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN);
+        localStorage.removeItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN_EXPIRATION_DATE);
+        throw new Error(data.error_description);
+      }
+
       const expirationDate = new Date();
       expirationDate.setSeconds(expirationDate.getSeconds() + data.expires_in);
       localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN, data.access_token);
