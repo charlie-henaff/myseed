@@ -22,10 +22,9 @@ export const fetch = (uri, options = {}) => {
     options.headers.set('Content-Type', 'MIME_TYPE');
   }
 
+  // add current device_id parameter on all ../player/.. post or put request
   let currentDeviceId = localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID);
   if (currentDeviceId === "undefined") currentDeviceId = null;
-
-  // add current device_id parameter on all ../player/.. post or put request
   if (
     currentDeviceId != null &&
     options?.method != null &&

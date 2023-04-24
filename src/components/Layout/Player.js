@@ -1,5 +1,5 @@
 import { ComputerRounded, DevicesRounded, KeyboardArrowUpRounded, PauseRounded, PlayArrowRounded, VolumeUpRounded } from '@mui/icons-material';
-import { CardMedia, colors, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Popover, Slide, Slider, Typography } from '@mui/material';
+import { CardMedia, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Popover, Slide, Slider, Typography, colors } from '@mui/material';
 import { withStyles } from '@mui/styles';
 import { Box } from '@mui/system';
 import { Component } from 'react';
@@ -97,10 +97,10 @@ class Player extends Component {
     getDevices() {
         spotifyFetch('/me/player/devices').then(res => {
             if (res?.devices) {
-                // const activeDevice = res.devices.find(device => device.is_active);
-                // if (activeDevice && activeDevice !== "undefined" && activeDevice.id) {
-                //     localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, activeDevice.id);
-                // }
+                const activeDevice = res.devices.find(device => device.is_active);
+                if (activeDevice && activeDevice !== "undefined" && activeDevice.id) {
+                    localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, activeDevice.id);
+                }
                 this.setState({
                     devices: {
                         ...this.state.devices,
@@ -232,6 +232,7 @@ class Player extends Component {
                     openMenuAnchor: null
                 }
             });
+            this.startFetchPlaybackStateInterval();
             setTimeout(() => this.play(), 1000);
         }), 1000);
     }
