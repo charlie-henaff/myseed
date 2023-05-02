@@ -11,11 +11,16 @@ DOCKER_VOLUMES		= -v ${CURRENT_PATH}:/usr/src
 DOCKER_RUN			= docker run ${DOCKER_EXTRA_PARAMS} --rm -u ${CURRENT_UID}:${CURRENT_GID} 
 DOCKER_RUN_NODE 	= ${DOCKER_RUN} -w /usr/src ${DOCKER_VOLUMES} -p ${NODE_PORTS} ${NODE_IMG}
 
+.DEFAULT_GOAL := help
+
+help:
+	@grep -Eh '(^[a-zA-Z_-]+:.*?##.*$$)|(^##)' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[32m%-30s\033[0m %s\n", $$1, $$2}' | sed -e 's/\[32m##/[33m/'
+.PHONY: help
+
+
 ## 
 ## Create
 ## ------
-## 
-
 create-react-app: ## args: name - Create a react app
 	@${DOCKER_RUN_NODE} npx create-react-app ${name}
 
@@ -24,8 +29,6 @@ create-react-app: ## args: name - Create a react app
 ## 
 ## Commands
 ## --------
-## 
-
 node: ## args: cmd - Execute a node command
 	@${DOCKER_RUN_NODE} ${cmd}
 
@@ -37,20 +40,21 @@ yarn: ## args: cmd - Execute a yarn command
 ## 
 ## Project
 ## -------
-## 
-
-install: yarn.lock
+yarn.lock.tmp: yarn.lock
 	@${DOCKER_RUN_NODE} yarn install
+	@touch yarn.lock.tmp
+
+build: yarn.lock.tmp ## Build project
+	@${DOCKER_RUN_NODE} yarn build
 
 start: ## Start project
-start: install
+start: yarn.lock.tmp
 	@${DOCKER_RUN_NODE} yarn start
 
-.PHONY: start
+serve: ## Serve project
+serve: yarn.lock.tmp build
+	@${DOCKER_RUN_NODE} yarn serve -s build
 
-## 
+.PHONY: build start serve
 
-.DEFAULT_GOAL := help
-help:
-	@grep -Eh '(^[a-zA-Z_-]+:.*?##.*$$)|(^##)' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[32m%-30s\033[0m %s\n", $$1, $$2}' | sed -e 's/\[32m##/[33m/'
-.PHONY: help
+##
