@@ -7,7 +7,7 @@ import IconButton from '@mui/material/IconButton';
 import InputBase from '@mui/material/InputBase';
 import Toolbar from '@mui/material/Toolbar';
 import { withStyles } from '@mui/styles';
-import { alpha } from '@mui/system';
+import { alpha } from '@mui/material';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';

@@ -1,7 +1,6 @@
 import { ComputerRounded, DevicesRounded, KeyboardArrowUpRounded, PauseRounded, PlayArrowRounded, VolumeUpRounded } from '@mui/icons-material';
-import { CardMedia, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Popover, Slide, Slider, Typography, colors } from '@mui/material';
+import { Box, CardMedia, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Popover, Slide, Slider, Typography, colors } from '@mui/material';
 import { withStyles } from '@mui/styles';
-import { Box } from '@mui/system';
 import { Component } from 'react';
 import { APP_CONST } from '../../constants';
 import { fetch as spotifyFetch } from '../../services/SpotifyServices';

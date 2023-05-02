@@ -11,7 +11,7 @@ import { appBarStates } from "../redux/reducers/layout/appBar";
 import { searchStates } from "../redux/reducers/search";
 import store from "../redux/store";
 import { search } from "../services/SearchServices";
-import Artist from "./Util/Card/Artist";
+import Track from "./Util/Card/Track";
 
 class Search extends Component {
 
@@ -65,7 +65,7 @@ class Search extends Component {
                             <Typography variant="h6" gutterBottom>Artistes</Typography>
                             <Grid container spacing={2}>
                                 {artists.map(item => {
-                                    return <Artist name={item.name} avatarUrl={item.images[1]?.url} key={"artist_" + item.id} />
+                                    return <Track name={item.name} avatarUrl={item.images[1]?.url} key={"artist_" + item.id} />
                                 })}
                             </Grid>
                         </Box>
@@ -75,7 +75,7 @@ class Search extends Component {
                             <Typography variant="h6" gutterBottom>Albums</Typography>
                             <Grid container spacing={2}>
                                 {albums.map(item => {
-                                    return <Artist name={item.name} avatarUrl={item.images[1]?.url} key={"artist_" + item.id} />
+                                    return <Track name={item.name} avatarUrl={item.images[1]?.url} key={"artist_" + item.id} />
                                 })}
                             </Grid>
                         </Box>
@@ -85,7 +85,7 @@ class Search extends Component {
                             <Typography variant="h6" gutterBottom>Musiques</Typography>
                             <Grid container spacing={2}>
                                 {tracks.map(item => {
-                                    return <Artist name={item.name} avatarUrl={item.album?.images[1]?.url} key={"artist_" + item.id} />
+                                    return <Track name={item.name} avatarUrl={item.album?.images[1]?.url} key={"artist_" + item.id} />
                                 })}
                             </Grid>
                         </Box>
