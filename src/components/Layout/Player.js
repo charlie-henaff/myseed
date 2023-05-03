@@ -13,7 +13,7 @@ class Player extends Component {
 
     static propTypes = {
         nextUris: PropTypes.array,
-        updatePlaying: PropTypes.func.isRequired,
+        currentUri: PropTypes.func.isRequired,
         setPlayerNextUris: PropTypes.func.isRequired,
     };
 
@@ -45,18 +45,22 @@ class Player extends Component {
         this.player = this.getPlayer();
     }
 
-    componentDidUpdate(prevProps, prevState){
-        if (prevState.progress != this.state.update){
-            if (this.state.update >= this.state.duration){
-                const{nextUris, setPlayerNextUris}=this.props;
-                if (nextUris[0]){
+    componentDidUpdate(prevProps, prevState) {
+        if (prevState.progress !== this.state.update) {
+            if (this.state.update >= this.state.duration) {
+                const { nextUris, setPlayerNextUris } = this.props;
+                if (nextUris[0]) {
                     spotifyFetch('/me/player/play', { method: 'put', body: JSON.stringify({ uris: [nextUris[0]] }) });
                     setPlayerNextUris(nextUris.slice(1));
                 }
             }
         }
+
+        if (prevState.uri !== this.state.uri) {
+            this.props.currentUri(this.state.uri);
+        }
     }
-    
+
     componentWillUnmount() {
         this.stopProgressInterval();
         this.stopFetchPlaybackInterval();
@@ -384,8 +388,8 @@ class Player extends Component {
                         filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
                     },
                 }}
-                transformOrigin={{ horizontal: 'top', vertical: 'bottom' }}
-                anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                transformOrigin={{ vertical: 'bottom', horizontal: 'top' }}
             >
                 {this.state.devices.list && this.state.devices.list.map(device =>
                     <MenuItem dense key={device.id} onClick={() => this.clickOnDeviceItem(device.id)}>
@@ -503,7 +507,7 @@ const mapStateToProps = state => {
 };
 
 const mapDispatchToProps = dispatch => ({
-    updatePlaying: track => dispatch({ type: playerState.PLAYING, playing: track }),
+    currentUri: uri => dispatch({ type: playerState.CURRENT_URI, currentUri: uri }),
     setPlayerNextUris: uris => dispatch({ type: playerState.NEXT_URIS, nextUris: uris })
 });
 
