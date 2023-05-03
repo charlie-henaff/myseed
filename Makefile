@@ -1,18 +1,18 @@
 -include .env .env.local
 
-CURRENT_UID 		= $(shell id -u)
-CURRENT_GID 		= $(shell id -g)
-CURRENT_PATH 		= $(shell pwd)
+CURRENT_UID         = $(shell id -u)
+CURRENT_GID         = $(shell id -g)
+CURRENT_PATH        = $(shell pwd)
 
-NODE_IMG 			= node:lts-alpine
-NODE_PORTS 			= 3000:3000
+NODE_IMG            = node:lts-alpine
+NODE_PORTS          = 3000:3000
 
-DOCKER_VOLUMES		= -v $(CURRENT_PATH):/usr/src
-DOCKER_RUN			= docker run $(DOCKER_EXTRA_PARAMS) --rm -u $(CURRENT_UID):$(CURRENT_GID) 
-DOCKER_RUN_NODE 	= $(DOCKER_RUN) -w /usr/src $(DOCKER_VOLUMES) -p $(NODE_PORTS) $(NODE_IMG)
+DOCKER_VOLUMES      = -v $(CURRENT_PATH):/usr/src
+DOCKER_RUN          = docker run $(DOCKER_EXTRA_PARAMS) --rm -u $(CURRENT_UID):$(CURRENT_GID) 
+DOCKER_RUN_NODE     = $(DOCKER_RUN) -w /usr/src $(DOCKER_VOLUMES) -p $(NODE_PORTS) $(NODE_IMG)
 
-.DEFAULT_GOAL := 	help
-.PHONY: 			help
+.DEFAULT_GOAL :=    help
+.PHONY:             help
 
 help:
 	@grep -Eh '(^[a-zA-Z_-]+:.*?##.*$$)|(^##)' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[32m%-30s\033[0m %s\n", $$1, $$2}' | sed -e 's/\[32m##/[33m/'
