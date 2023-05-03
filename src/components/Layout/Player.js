@@ -307,7 +307,7 @@ class Player extends Component {
         const isVolumePopoverOpen = Boolean(this.state.openVolumePopoverAnchor);
         const { classes } = this.props;
         return (
-            <Slide direction="up" in={this.state.isReady} mountOnEnter unmountOnExit>
+            <Slide direction="up" in={this.state.isReady && this.state.title && this.state.artist} mountOnEnter unmountOnExit>
                 <Box className={classes.root}>
                     <Box className={classes.shape}>
                         <Box className={classes.content}>
@@ -325,8 +325,8 @@ class Player extends Component {
                             }
 
                             <Box className={classes.mediaData} pl={!this.state.img ? 3 : 1}>
-                                <Typography variant='body2' noWrap >{this.state.title ? this.state.title : 'Bonnes découvertes'}</Typography>
-                                <Typography variant='caption' noWrap >{this.state.artist ? this.state.artist : 'Choisissez un titre pour commencer votre voyage musical'}</Typography>
+                                <Typography variant='body2' noWrap >{this.state.title}</Typography>
+                                <Typography variant='caption' noWrap >{this.state.artist}</Typography>
                                 <Slider size="small" color='secondary'
                                     value={this.state.progress} min={0} max={this.state.duration}
                                     onChange={(event, value) => this.setState({ progress: value })}
