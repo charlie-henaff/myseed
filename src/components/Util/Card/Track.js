@@ -5,7 +5,7 @@ import React, { Component } from "react";
 import imgTest from "../../../assets/img/man_listening_music_in_sleeping.jpg";
 import Overlay from "../Overlay";
 
-class Artist extends Component {
+class Track extends Component {
 
     constructor(props) {
         super(props);
@@ -18,16 +18,17 @@ class Artist extends Component {
         name: PropTypes.string,
         avatarUrl: PropTypes.string,
         onCardClick: PropTypes.func,
-        selected: PropTypes.bool,
     };
 
     render() {
+        const {classes} = this.props;
+        const {name, avatarUrl, onCardClick} = this.props;
         const {hover} = this.state;
+
         const setHover = (value) => {
             this.setState({hover: value});
         };
 
-        const {classes, name, avatarUrl, onCardClick, selected} = this.props;
         return (
             <>
                 <Grid item xs={6} sm={4} md={2} xl={1}>
@@ -36,8 +37,8 @@ class Artist extends Component {
                           onMouseOut={() => setHover(false)}
                           onClick={onCardClick}>
                         <ButtonBase className={classes.button}>
-                            <CardMedia className={classes.media} image={avatarUrl ? avatarUrl : imgTest}>
-                                <Overlay color={colors.grey["900"]} opacity={hover || selected ? 0 : 0.3}/>
+                            <CardMedia className={classes.media} image={avatarUrl ? avatarUrl : imgTest} loading="lazy">
+                                <Overlay color={colors.grey["900"]} opacity={!hover ? 0.3 : 0}/>
                                 <Box className={classes.content} p={2}>
                                     <Typography variant="overline" className={classes.name}>{name}</Typography>
                                 </Box>
@@ -72,4 +73,4 @@ const styles = theme => ({
     }
 });
 
-export default withStyles(styles)(Artist);
+export default withStyles(styles)(Track);

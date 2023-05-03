@@ -1,5 +1,4 @@
-import { Container, Grid, LinearProgress } from '@mui/material';
-import { Box } from '@mui/system';
+import { Box, Container, Grid, LinearProgress } from '@mui/material';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -12,7 +11,7 @@ import { playlistStates } from '../redux/reducers/playlist';
 import store from '../redux/store';
 import { topsRecommendations } from '../services/PlaylistServices';
 import { fetch as spotifyFetch } from '../services/SpotifyServices';
-import Artist from './Util/Card/Artist';
+import Track from './Util/Card/Track';
 
 
 class Playlist extends Component {
@@ -95,13 +94,7 @@ class Playlist extends Component {
             <Box py={2}>
               <Grid container spacing={2}>
                 {tracks.map((item, index) => {
-                  return <Artist
-                    name={item.name}
-                    avatarUrl={item.album?.images[1].url}
-                    key={"artist_" + item.id}
-                    onCardClick={() => this.startPLaylistHere(index)}
-                    selected={playing && playing.id === item.id}
-                  />
+                  return <Track name={item.name} avatarUrl={item.album?.images[1].url} key={"artist_" + item.id} onCardClick={() => this.startPLaylistHere(index)} selected={playing && playing.id === item.id}  />
                 })}
               </Grid>
             </Box>

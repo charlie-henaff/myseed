@@ -1,5 +1,5 @@
+import { Box } from '@mui/material';
 import { withStyles } from '@mui/styles';
-import { Box } from '@mui/system';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { APP_CONST } from '../constants';
