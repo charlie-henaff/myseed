@@ -15,6 +15,7 @@ class Player extends Component {
         nextUris: PropTypes.array,
         currentUri: PropTypes.func.isRequired,
         setPlayerNextUris: PropTypes.func.isRequired,
+        setPlayerCurrentUri: PropTypes.func.isRequired,
     };
 
     state = {
@@ -46,19 +47,27 @@ class Player extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (prevState.progress !== this.state.progress) {
-            if (this.state.progress === 0 || this.state.progress >= this.state.duration) {
-                const { nextUris, setPlayerNextUris } = this.props;
-                if (nextUris[0]) {
-                    this.setState({progress: null});
-                    spotifyFetch('/me/player/play', { method: 'put', body: JSON.stringify({ uris: [nextUris[0]] }) });
-                    setPlayerNextUris(nextUris.slice(1));
-                }
+        const { setPlayerCurrentUri } = this.props;
+
+        // trigger next track on end 
+        const oldProgress = prevState.progress;
+        const newProgress = this.state.progress;
+        const isPlayedLocally = this.state.isPlayedLocally;
+        if (prevState.isPlaying && (
+            (!isPlayedLocally && newProgress === 0 && prevState.uri === this.state.uri) ||
+            (isPlayedLocally && oldProgress !== newProgress && newProgress >= this.state.duration)
+        )) {
+            const { nextUris, setPlayerNextUris } = this.props;
+            const nextUri = nextUris[0];
+            if (nextUri) {
+                this.setState({ progress: null });
+                spotifyFetch('/me/player/play', { method: 'put', body: JSON.stringify({ uris: [nextUri] }) });
+                setPlayerNextUris(nextUris.slice(1));
             }
         }
 
         if (prevState.uri !== this.state.uri) {
-            this.props.currentUri(this.state.uri);
+            setPlayerCurrentUri(this.state.uri);
         }
     }
 
@@ -115,6 +124,7 @@ class Player extends Component {
             });
 
             player.addListener('player_state_changed', playbackState => {
+                this.startFetchPlaybackStateInterval();
                 this.updateState(playbackState)
             });
 
@@ -308,7 +318,7 @@ class Player extends Component {
         const isVolumePopoverOpen = Boolean(this.state.openVolumePopoverAnchor);
         const { classes } = this.props;
         return (
-            <Slide direction="up" in={this.state.isReady && this.state.title && this.state.artist} mountOnEnter unmountOnExit>
+            <Slide direction="up" in={this.state.isReady} mountOnEnter unmountOnExit>
                 <Box className={classes.root}>
                     <Box className={classes.shape}>
                         <Box className={classes.content}>
@@ -326,8 +336,8 @@ class Player extends Component {
                             }
 
                             <Box className={classes.mediaData} pl={!this.state.img ? 3 : 1}>
-                                <Typography component='p' variant='body2' noWrap >{this.state.title}</Typography>
-                                <Typography component='p' variant='caption' noWrap >{this.state.artist}</Typography>
+                                <Typography component='p' variant='body2' noWrap >{this.state.title || "Bonnes découvertes !"}</Typography>
+                                <Typography component='p' variant='caption' noWrap >{this.state.artist || "Choissisez un titre pour commencer"}</Typography>
                                 <Slider size="small" color='secondary'
                                     value={this.state.progress} min={0} max={this.state.duration}
                                     onChange={(event, value) => this.setState({ progress: value })}
@@ -509,7 +519,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
     currentUri: uri => dispatch({ type: playerState.CURRENT_URI, currentUri: uri }),
-    setPlayerNextUris: uris => dispatch({ type: playerState.NEXT_URIS, nextUris: uris })
+    setPlayerNextUris: uris => dispatch({ type: playerState.NEXT_URIS, nextUris: uris }),
+    setPlayerCurrentUri: uri => dispatch({ type: playerState.CURRENT_URI, currentUri: uri })
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Player));
