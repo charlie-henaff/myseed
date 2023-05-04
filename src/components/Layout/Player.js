@@ -46,10 +46,11 @@ class Player extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (prevState.progress !== this.state.update) {
-            if (this.state.update >= this.state.duration) {
+        if (prevState.progress !== this.state.progress) {
+            if (this.state.progress === 0 || this.state.progress >= this.state.duration) {
                 const { nextUris, setPlayerNextUris } = this.props;
                 if (nextUris[0]) {
+                    this.setState({progress: null});
                     spotifyFetch('/me/player/play', { method: 'put', body: JSON.stringify({ uris: [nextUris[0]] }) });
                     setPlayerNextUris(nextUris.slice(1));
                 }
@@ -325,8 +326,8 @@ class Player extends Component {
                             }
 
                             <Box className={classes.mediaData} pl={!this.state.img ? 3 : 1}>
-                                <Typography variant='body2' noWrap >{this.state.title}</Typography>
-                                <Typography variant='caption' noWrap >{this.state.artist}</Typography>
+                                <Typography component='p' variant='body2' noWrap >{this.state.title}</Typography>
+                                <Typography component='p' variant='caption' noWrap >{this.state.artist}</Typography>
                                 <Slider size="small" color='secondary'
                                     value={this.state.progress} min={0} max={this.state.duration}
                                     onChange={(event, value) => this.setState({ progress: value })}

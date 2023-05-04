@@ -17,7 +17,7 @@ export function visible(state = false, action) {
 
 export function nextUris(state = [], action) {
     switch (action.type) {
-        case playerState.URIS:
+        case playerState.NEXT_URIS:
             return action.nextUris;
         default:
             return state;

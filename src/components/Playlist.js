@@ -29,6 +29,7 @@ class Playlist extends Component {
         setPlaylistError: PropTypes.func.isRequired,
         setPlayerVisible: PropTypes.func.isRequired,
         setPlayerNextUris: PropTypes.func.isRequired,
+        setPlayerCurrentUri: PropTypes.func.isRequired,
     };
 
     componentDidMount() {
@@ -51,12 +52,6 @@ class Playlist extends Component {
         this.getTopRecomendations();
     }
 
-    componentDidUpdate(prevProps, prevState) {
-        if (prevProps.currentUri !== this.props.currentUri){
-            console.log('playlist new uri : ' + this.props.currentUri);
-        }
-    }
-
     componentWillUnmount() {
         const { setPlayerVisible } = this.props;
         setPlayerVisible(false);
@@ -73,9 +68,11 @@ class Playlist extends Component {
     };
 
     startPLaylistHere(trackIndex) {
-        const { tracks, setPlayerNextUris } = this.props;
-        spotifyFetch('/me/player/play', { method: 'put', body: JSON.stringify({ uris: [tracks[trackIndex].uri] }) });
+        const { tracks, setPlayerNextUris, setPlayerCurrentUri } = this.props;
+        const selectedUri = tracks[trackIndex].uri;
+        spotifyFetch('/me/player/play', { method: 'put', body: JSON.stringify({ uris: [selectedUri] }) });
         setPlayerNextUris(tracks.slice(trackIndex + 1).map(track => track.uri));
+        setPlayerCurrentUri(selectedUri);
     }
 
     render() {
@@ -125,7 +122,8 @@ const mapDispatchToProps = dispatch => ({
     setPlaylistLoading: isLoading => store.dispatch({ type: playlistStates.LOADING, loading: isLoading }),
     setPlaylistError: error => store.dispatch({ type: playlistStates.ERROR, error: error }),
     setPlayerVisible: visible => store.dispatch({ type: playerState.VISIBLE, visible: visible }),
-    setPlayerNextUris: uris => store.dispatch({ type: playerState.NEXT_URIS, uris: uris }),
+    setPlayerNextUris: uris => store.dispatch({ type: playerState.NEXT_URIS, nextUris: uris }),
+    setPlayerCurrentUri: uri => store.dispatch({ type: playerState.CURRENT_URI, currentUri: uri }),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Playlist);
