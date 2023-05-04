@@ -1,4 +1,4 @@
-import { ComputerRounded, DevicesRounded, KeyboardArrowUpRounded, PauseRounded, PlayArrowRounded, VolumeUpRounded } from '@mui/icons-material';
+import { ComputerRounded, DevicesRounded, KeyboardArrowUpRounded, PauseRounded, PlayArrowRounded, SkipNextRounded, VolumeUpRounded } from '@mui/icons-material';
 import { Box, CardMedia, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Popover, Slide, Slider, Typography, colors } from '@mui/material';
 import { withStyles } from '@mui/styles';
 import PropTypes from 'prop-types';
@@ -19,16 +19,17 @@ class Player extends Component {
     };
 
     state = {
-        isReady: false,
+        localPlayerReady: false,
+        localPlayerId: null,
         isPlaying: false,
         isPlayedLocally: false,
+        updatingProgress: false,
         progress: 0,
         duration: 1,
         title: '',
         artist: '',
         img: '',
         uri: '',
-        url: '',
         volume: 50,
         openVolumePopoverAnchor: null,
         devices: {
@@ -37,42 +38,34 @@ class Player extends Component {
         }
     }
 
-    progressInterval = null;
     playbackStateInterval = null;
     player = null;
-    localPlayerId = null;
 
     componentDidMount() {
+        this.getDevices();
         this.player = this.getPlayer();
+        this.startFetchPlaybackStateInterval();
     }
 
     componentDidUpdate(prevProps, prevState) {
         const { setPlayerCurrentUri } = this.props;
 
+        const progressHasChanged = prevState.progress !== this.state.progress;
+        const uriHasChanged = prevState.uri !== this.state.uri;
+        const newProgressIsAStart = this.state.progress === 0;
+
         // trigger next track on end 
-        const oldProgress = prevState.progress;
-        const newProgress = this.state.progress;
-        const isPlayedLocally = this.state.isPlayedLocally;
-        if (prevState.isPlaying && (
-            (!isPlayedLocally && newProgress === 0 && prevState.uri === this.state.uri) ||
-            (isPlayedLocally && oldProgress !== newProgress && newProgress >= this.state.duration)
-        )) {
-            const { nextUris, setPlayerNextUris } = this.props;
-            const nextUri = nextUris[0];
-            if (nextUri) {
-                this.setState({ progress: null });
-                spotifyFetch('/me/player/play', { method: 'put', body: JSON.stringify({ uris: [nextUri] }) });
-                setPlayerNextUris(nextUris.slice(1));
-            }
+        if (progressHasChanged && !uriHasChanged && newProgressIsAStart) {
+            this.nextTrack();
         }
 
-        if (prevState.uri !== this.state.uri) {
+        // trigger current playing uri changed
+        if (this.state.uri && uriHasChanged) {
             setPlayerCurrentUri(this.state.uri);
         }
     }
 
     componentWillUnmount() {
-        this.stopProgressInterval();
         this.stopFetchPlaybackInterval();
         this.player.then(player => player.disconnect());
     }
@@ -92,40 +85,11 @@ class Player extends Component {
             });
 
             player.addListener('ready', ({ device_id }) => {
-                this.localPlayerId = device_id;
-
-                spotifyFetch('/me/player').then(playbackState => {
-                    if (!playbackState) {
-                        this.updatePlayingDevices(device_id).finally(() => {
-                            localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, device_id);
-                            this.setState({ isPlayedLocally: true });
-                        });
-                        return;
-                    }
-
-                    this.setState({
-                        isPlaying: playbackState.is_playing,
-                        progress: playbackState.progress_ms,
-                        duration: playbackState.item.duration_ms,
-                        title: playbackState.item.name,
-                        artist: playbackState.item.artists.map(artist => artist.name).join(', '),
-                        img: playbackState.item.album.images[0].url,
-                        uri: playbackState.item.uri,
-                        volume: playbackState.device.volume_percent
-                    });
-
-                    this.toggleProgressInterval();
-                    if (!this.state.isPlayedLocally) this.startFetchPlaybackStateInterval();
-                }).finally(() => {
-                    this.setState({ isReady: true });
+                this.setState({
+                    localPlayerReady: true,
+                    localPlayerId: device_id
                 });
-
                 this.getDevices();
-            });
-
-            player.addListener('player_state_changed', playbackState => {
-                this.startFetchPlaybackStateInterval();
-                this.updateState(playbackState)
             });
 
             player.activateElement();
@@ -141,6 +105,8 @@ class Player extends Component {
                 const activeDevice = res.devices.find(device => device.is_active);
                 if (activeDevice && activeDevice !== "undefined" && activeDevice.id) {
                     localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, activeDevice.id);
+                } else if (this.state.localPlayerId) {
+                    localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, this.state.localPlayerId);
                 }
                 this.setState({
                     devices: {
@@ -148,76 +114,38 @@ class Player extends Component {
                         list: res.devices,
                     }
                 });
+            } else if (this.state.localPlayerId) {
+                localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, this.state.localPlayerId);
             }
         });
-    }
-
-    updateState(playerState) {
-        const currentTrack = playerState?.track_window.current_track;
-
-        if (!playerState || !currentTrack) {
-            this.setState({ isPlayedLocally: false });
-            this.startFetchPlaybackStateInterval();
-            return;
-        }
-
-        this.stopFetchPlaybackInterval();
-
-        this.setState({
-            isPlaying: !playerState.paused,
-            progress: playerState.position,
-            duration: playerState.duration,
-            title: currentTrack.name,
-            artist: currentTrack.artists.map(artist => artist.name).join(', '),
-            img: currentTrack.album.images[0].url,
-            uri: currentTrack.uri,
-            isPlayedLocally: true,
-        });
-
-        this.toggleProgressInterval();
-    }
-
-    startProgressInterval() {
-        if (this.progressInterval !== null) this.stopProgressInterval();
-        this.setState({ isPlaying: true });
-        this.progressInterval = setInterval(() => {
-            this.setState({ progress: this.state.progress + 1000 });
-            if (this.state.progress >= this.state.duration) {
-                this.startFetchPlaybackStateInterval();
-            }
-        }, 1000);
-    }
-
-    stopProgressInterval() {
-        this.setState({ isPlaying: false });
-        if (this.progressInterval !== null) clearInterval(this.progressInterval);
-    }
-
-    toggleProgressInterval() {
-        if (this.state.isPlaying) this.startProgressInterval()
-        else this.stopProgressInterval();
     }
 
     updatePlayingDevices(device_id) {
-        return spotifyFetch('/me/player', { method: 'PUT', body: JSON.stringify({ device_ids: [device_id] }) });
-        // .catch(() => setTimeout(() => this.updatePlayingDevices(device_id), 2000));
+        return spotifyFetch('/me/player', { method: 'PUT', body: JSON.stringify({ device_ids: [device_id] }) })
+            .then(() => {
+                localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, device_id);
+                this.setState({
+                    devices: {
+                        ...this.state.devices,
+                        openMenuAnchor: null
+                    }
+                });
+            });
     }
 
     fetchPlaybackState() {
         spotifyFetch('/me/player').then(playbackState => {
-            if (playbackState) {
-                this.setState({
-                    isPlaying: playbackState.is_playing,
-                    progress: playbackState.progress_ms,
-                    duration: playbackState.item.duration_ms,
-                    title: playbackState.item.name,
-                    artist: playbackState.item.artists.map(artist => artist.name).join(', '),
-                    img: playbackState.item.album.images[0].url,
-                    uri: playbackState.item.uri,
-                    isPlayedLocally: playbackState.device.id === this.localPlayerId,
-                    volume: playbackState.device.volume_percent
-                });
-                this.toggleProgressInterval();
+            this.setState({
+                isPlaying: playbackState?.is_playing || false,
+                isPlayedLocally: playbackState?.device?.id === this.state.localPlayerId || false,
+                duration: playbackState?.item?.duration_ms || 0,
+                title: playbackState?.item?.name || null,
+                artist: playbackState?.item?.artists.map(artist => artist.name).join(', ') || null,
+                img: playbackState?.item?.album.images[0].url || null,
+                uri: playbackState?.item?.uri || null
+            });
+            if (!this.state.updatingProgress) {
+                this.setState({ progress: playbackState?.progress_ms || 0 });
             }
         });
     }
@@ -225,13 +153,8 @@ class Player extends Component {
     startFetchPlaybackStateInterval() {
         if (this.playbackStateInterval !== null) clearInterval(this.playbackStateInterval);
         this.playbackStateInterval = setInterval(() => {
-            if (this.state.isPlayedLocally) {
-                clearInterval(this.playbackStateInterval);
-                this.playbackStateInterval = null;
-                return;
-            }
             this.fetchPlaybackState();
-        }, 3000);
+        }, 1000);
     }
 
     stopFetchPlaybackInterval() {
@@ -241,16 +164,11 @@ class Player extends Component {
 
     play() {
         this.player.then(player => player.activateElement());
-        this.startProgressInterval();
-
-        spotifyFetch('/me/player/play', { method: 'PUT', body: JSON.stringify({ uris: [this.state.uri], position_ms: this.state.progress }) })
-            .then(() => { if (!this.state.isPlayedLocally) setTimeout(() => this.startFetchPlaybackStateInterval(), 3000); });
+        spotifyFetch('/me/player/play', { method: 'PUT', body: JSON.stringify({ uris: [this.state.uri], position_ms: this.state.progress }) });
     }
 
     pause() {
-        this.stopProgressInterval();
-        spotifyFetch('/me/player/pause', { method: 'PUT' })
-            .then(() => { if (!this.state.isPlayedLocally) setTimeout(() => this.startFetchPlaybackStateInterval(), 3000); });
+        spotifyFetch('/me/player/pause', { method: 'PUT' });
     }
 
     togglePlay() {
@@ -258,42 +176,31 @@ class Player extends Component {
         else this.play();
     }
 
+    nextTrack() {
+        const { nextUris, setPlayerNextUris } = this.props;
+        const nextUri = nextUris[0];
+        if (nextUri) {
+            spotifyFetch('/me/player/play', { method: 'put', body: JSON.stringify({ uris: [nextUri] }) });
+            setPlayerNextUris(nextUris.slice(1));
+        }
+    }
+
     openDevicesMenu(event) {
         this.getDevices();
         this.setState({ devices: { ...this.state.devices, openMenuAnchor: event.currentTarget } });
     }
 
-    clickOnDeviceItem(newDeviceId) {
-        this.pause();
-        setTimeout(() => this.updatePlayingDevices(newDeviceId).then(() => {
-            localStorage.setItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID, newDeviceId);
-            this.setState({
-                devices: {
-                    ...this.state.devices,
-                    openMenuAnchor: null
-                }
-            });
-            this.startFetchPlaybackStateInterval();
-            setTimeout(() => this.play(), 1000);
-        }), 1000);
+    updatingProgress(newProgress) {
+        this.setState({
+            updatingProgress: true,
+            progress: newProgress
+        });
     }
 
     updateProgress(newProgress) {
-        let fetchingPlayerStateInterval = this.playbackStateInterval != null;
-
-        this.stopProgressInterval();
-        if (fetchingPlayerStateInterval) {
-            this.stopFetchPlaybackInterval();
-        }
-
         this.setState({ progress: newProgress });
-        spotifyFetch('/me/player/seek?position_ms=' + newProgress, { method: 'PUT' }).then(() => {
-            if (this.state.isPlaying) this.startProgressInterval();
-            setTimeout(() => {
-                if (fetchingPlayerStateInterval) this.startFetchPlaybackStateInterval();
-                else this.fetchPlaybackState()
-            }, 3000);
-        });
+        spotifyFetch('/me/player/seek?position_ms=' + newProgress, { method: 'PUT' })
+            .then(() => this.setState({ updatingProgress: false }));
     }
 
     openSpotifyTrack() {
@@ -302,15 +209,14 @@ class Player extends Component {
     }
 
     openVolumePopover(event) {
+        spotifyFetch('/me/player').then(playbackState => this.setState({ volume: playbackState?.device?.volume_percent || 0 }));
         this.setState({ openVolumePopoverAnchor: event.currentTarget });
     }
 
     updateVolume(newVolume) {
         this.setState({ volume: newVolume });
         spotifyFetch('/me/player/volume?volume_percent=' + newVolume, { method: 'PUT' })
-            .then(() => {
-                this.setState({ openVolumePopoverAnchor: null })
-            });
+            .then(() => this.setState({ openVolumePopoverAnchor: null }));
     }
 
     render() {
@@ -318,7 +224,7 @@ class Player extends Component {
         const isVolumePopoverOpen = Boolean(this.state.openVolumePopoverAnchor);
         const { classes } = this.props;
         return (
-            <Slide direction="up" in={this.state.isReady} mountOnEnter unmountOnExit>
+            <Slide direction="up" in={this.state.localPlayerReady} mountOnEnter unmountOnExit>
                 <Box className={classes.root}>
                     <Box className={classes.shape}>
                         <Box className={classes.content}>
@@ -340,7 +246,7 @@ class Player extends Component {
                                 <Typography component='p' variant='caption' noWrap >{this.state.artist || "Choissisez un titre pour commencer"}</Typography>
                                 <Slider size="small" color='secondary'
                                     value={this.state.progress} min={0} max={this.state.duration}
-                                    onChange={(event, value) => this.setState({ progress: value })}
+                                    onChange={(event, value) => this.updatingProgress(value)}
                                     onChangeCommitted={(event, value) => this.updateProgress(value)}
                                     sx={{ height: 4, padding: '0 !important' }}
                                 />
@@ -358,19 +264,24 @@ class Player extends Component {
                                         ? <ComputerRounded sx={{ color: 'white' }} />
                                         : <DevicesRounded sx={{ color: theme.palette.secondary.main }} />}
                                 </IconButton>
-                                <IconButton size='small' sx={{ color: 'white' }}
-                                    aria-controls={isVolumePopoverOpen ? 'volumePopover' : undefined}
-                                    aria-haspopup="true"
-                                    aria-expanded={isVolumePopoverOpen ? 'true' : undefined}
-                                    onClick={event => this.openVolumePopover(event)}
-                                >
-                                    <VolumeUpRounded sx={{ color: 'white' }} />
-                                </IconButton>
+                                {this.state.localPlayerId !== localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID) &&
+                                    <IconButton size='small' sx={{ color: 'white' }}
+                                        aria-controls={isVolumePopoverOpen ? 'volumePopover' : undefined}
+                                        aria-haspopup="true"
+                                        aria-expanded={isVolumePopoverOpen ? 'true' : undefined}
+                                        onClick={event => this.openVolumePopover(event)}
+                                    >
+                                        <VolumeUpRounded sx={{ color: 'white' }} />
+                                    </IconButton>
+                                }
                                 <IconButton size='small' sx={{ color: 'white' }} onClick={() => this.togglePlay()}>
                                     {this.state.isPlaying
                                         ? <PauseRounded sx={{ color: 'white' }} />
                                         : <PlayArrowRounded sx={{ color: 'white' }} />
                                     }
+                                </IconButton>
+                                <IconButton size='small' sx={{ color: 'white' }} onClick={() => this.nextTrack()}>
+                                    <SkipNextRounded sx={{ color: 'white' }} />
                                 </IconButton>
 
                                 {this.devicesMenuRender()}
@@ -395,7 +306,8 @@ class Player extends Component {
                 PaperProps={{
                     elevation: 1,
                     sx: {
-                        overflow: 'visible',
+                        maxHeight: 200,
+                        overflow: 'auto',
                         filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
                     },
                 }}
@@ -403,7 +315,7 @@ class Player extends Component {
                 transformOrigin={{ vertical: 'bottom', horizontal: 'top' }}
             >
                 {this.state.devices.list && this.state.devices.list.map(device =>
-                    <MenuItem dense key={device.id} onClick={() => this.clickOnDeviceItem(device.id)}>
+                    <MenuItem dense key={device.id} onClick={() => this.updatePlayingDevices(device.id)}>
                         <ListItemIcon sx={{ color: device.id === localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID) ? theme.palette.secondary.main : '' }}><ComputerRounded fontSize="small" /></ListItemIcon>
                         <ListItemText sx={{ color: device.id === localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID) ? theme.palette.secondary.main : '' }}>{device.name}</ListItemText>
                     </MenuItem>
