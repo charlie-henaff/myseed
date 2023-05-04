@@ -1,19 +1,18 @@
-import {applyMiddleware, combineReducers, compose, createStore} from 'redux';
+import { connectRouter, routerMiddleware } from 'connected-react-router';
+import { applyMiddleware, combineReducers, createStore } from 'redux';
+import { composeWithDevTools } from 'redux-devtools-extension';
+import { reducer as form } from 'redux-form';
 import thunk from 'redux-thunk';
-import {reducer as form} from 'redux-form';
-import {connectRouter, routerMiddleware,} from 'connected-react-router';
-import appState from './reducers';
 import history from '../history';
+import appState from './reducers';
 
-const composeEnhancers = (typeof window !== 'undefined' &&
-    window.__REDUX_DEVTOOLS_EXTENSION__) || compose;
+// const composeEnhancers = (typeof window !== 'undefined' && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) || compose;
 
 export default createStore(
-    combineReducers({
-      app: appState,
-      router: connectRouter(history),
-      form,
-      composeEnhancers,
-    }),
-    applyMiddleware(routerMiddleware(history), thunk),
+  combineReducers({
+    app: appState,
+    router: connectRouter(history),
+    form,
+  }),
+  composeWithDevTools(applyMiddleware(routerMiddleware(history), thunk))
 );

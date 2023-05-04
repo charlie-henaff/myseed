@@ -1,5 +1,4 @@
 import { Box, Container, Grid, LinearProgress } from '@mui/material';
-import { withStyles } from '@mui/styles';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -7,7 +6,7 @@ import { APP_CONST } from '../constants';
 import history from '../history';
 import { layoutStates } from "../redux/reducers/layout";
 import { appBarStates } from '../redux/reducers/layout/appBar';
-import { spotifyPlayerState } from '../redux/reducers/layout/spotifyPlayer';
+import { playerState } from '../redux/reducers/layout/player';
 import { playlistStates } from '../redux/reducers/playlist';
 import store from '../redux/store';
 import { topsRecommendations } from '../services/PlaylistServices';
@@ -17,96 +16,114 @@ import Track from './Util/Card/Track';
 
 class Playlist extends Component {
 
-  static propTypes = {
-    playlistLoading: PropTypes.bool,
-    tracks: PropTypes.array,
-  };
+    static propTypes = {
+        isLoading: PropTypes.bool,
+        tracks: PropTypes.array,
+        currentUri: PropTypes.string,
 
-  state = {
-    lastTracks: null
-  };
+        setAppBarTitle: PropTypes.func.isRequired,
+        setLayoutVisible: PropTypes.func.isRequired,
+        setLayoutFullSizeContent: PropTypes.func.isRequired,
+        setPlaylistResults: PropTypes.func.isRequired,
+        setPlaylistLoading: PropTypes.func.isRequired,
+        setPlaylistError: PropTypes.func.isRequired,
+        setPlayerVisible: PropTypes.func.isRequired,
+        setPlayerNextUris: PropTypes.func.isRequired,
+        setPlayerCurrentUri: PropTypes.func.isRequired,
+    };
 
-  componentDidMount() {
-    if (!localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN)) {
-      history.push('/login');
+    componentDidMount() {
+        if (!localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN)) {
+            history.push('/login');
+        }
+
+        const {
+            setAppBarTitle,
+            setLayoutVisible,
+            setLayoutFullSizeContent,
+            setPlayerVisible
+        } = this.props;
+
+        setAppBarTitle('Playlist');
+        setLayoutVisible(true);
+        setLayoutFullSizeContent(false);
+        setPlayerVisible(true);
+
+        this.getTopRecomendations();
     }
 
-    store.dispatch({ type: layoutStates.VISIBLE, visible: true });
-    store.dispatch({ type: layoutStates.FULL_SIZE_CONTENT, fullSizeContent: false });
-    store.dispatch({ type: appBarStates.TITLE, title: 'Playlist' });
-
-    getTopRecomendations();
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    const { tracks } = this.props;
-    if (tracks && tracks !== prevProps.tracks) {
-      store.dispatch({ type: spotifyPlayerState.VISIBLE, visible: true });
-      store.dispatch({ type: spotifyPlayerState.URIS, uris: tracks.map(track => track.uri) });
+    componentWillUnmount() {
+        const { setPlayerVisible } = this.props;
+        setPlayerVisible(false);
     }
-  }
 
-  componentWillUnmount() {
-    store.dispatch({ type: spotifyPlayerState.VISIBLE, visible: false });
-  }
 
-  startPLaylistHere(trackIndex) {
-    spotifyFetch('/me/player/play', { method: 'put', body: JSON.stringify({ uris: [this.props.tracks[trackIndex].uri] }) });
+    getTopRecomendations = () => {
+        const { setPlaylistLoading, setPlaylistResults, setPlaylistError } = this.props;
+        setPlaylistLoading(true);
+        topsRecommendations()
+            .then(result => setPlaylistResults(result.tracks))
+            .finally(() => setPlaylistLoading(false))
+            .catch(error => error.message && setPlaylistError(error.message || "Une erreur est survenue."));
+    };
 
-    // NOT WORKING : Cannot manage queue properly
-    // let timeout = 1000;
-    // this.props.tracks.slice(trackIndex + 1).forEach(track => {
-    //   setTimeout(() => fetchSpotify('/me/player/queue?uri=' + track.uri, { method: 'POST' }), timeout);
-    //   timeout = timeout + 1000;
-    // });
-  }
+    startPLaylistHere(trackIndex) {
+        const { tracks, setPlayerNextUris, setPlayerCurrentUri } = this.props;
+        const selectedUri = tracks[trackIndex].uri;
+        spotifyFetch('/me/player/play', { method: 'put', body: JSON.stringify({ uris: [selectedUri] }) });
+        setPlayerNextUris(tracks.slice(trackIndex + 1).map(track => track.uri));
+        setPlayerCurrentUri(selectedUri);
+    }
 
-  render() {
-    const { playlistLoading, tracks } = this.props;
+    render() {
+        const {
+            isLoading,
+            tracks,
+            currentUri,
+        } = this.props;
 
-    return (
-      <>
-        {playlistLoading && <LinearProgress color="secondary" />}
-        <Container maxWidth={false}>
-          {playlistLoading || !tracks ? "" : (
-            <Box py={2}>
-              <Grid container spacing={2}>
-                {tracks.map((item, index) => {
-                  return <Track name={item.name} avatarUrl={item.album?.images[1].url} key={"artist_" + item.id} onCardClick={() => this.startPLaylistHere(index)} />
-                })}
-              </Grid>
-            </Box>
-          )}
-        </Container>
-      </>
-    );
-  }
+        return (
+            <>
+                {isLoading && <LinearProgress color="secondary" />}
+                <Container maxWidth={false}>
+                    {isLoading || !tracks ? "" : (
+                        <Box py={2}>
+                            <Grid container spacing={2}>
+                                {tracks.map((item, index) => {
+                                    return <Track name={item.name}
+                                        avatarUrl={item.album?.images[1].url}
+                                        key={"artist_" + item.id}
+                                        onCardClick={() => this.startPLaylistHere(index)}
+                                        selected={currentUri && currentUri === item.uri}
+                                    />
+                                })}
+                            </Grid>
+                        </Box>
+                    )}
+                </Container>
+            </>
+        );
+    }
 }
 
-const styles = (theme) => ({
-
-});
-
-const getTopRecomendations = () => {
-  store.dispatch({ type: playlistStates.LOADING, loading: true });
-  topsRecommendations()
-    .then(result => store.dispatch({ type: playlistStates.RESULT, result: result.tracks }))
-    .finally(() => store.dispatch({ type: playlistStates.LOADING, loading: false }))
-    .catch(error => {
-      if (error.message) {
-        store.dispatch({ type: playlistStates.ERROR, error: (error.message || "Une erreur est survenue.") });
-      }
-    });;
-};
-
 const mapStateToProps = state => {
-  const playlistLoading = state.app.playlist.loading;
-  const tracks = state.app.playlist.result;
-  const playlistError = state.app.playlist.error;
-  return { playlistLoading, tracks, playlistError };
+    const isLoading = state.app.playlist.loading;
+    const tracks = state.app.playlist.result;
+    const error = state.app.playlist.error;
+    const currentUri = state.app.layout.player.currentUri;
+    return { isLoading, tracks, error, currentUri };
 };
 
 const mapDispatchToProps = dispatch => ({
+    setAppBarTitle: title => store.dispatch({ type: appBarStates.TITLE, title: title }),
+    setLayoutVisible: visible => dispatch({ type: layoutStates.VISIBLE, visible: visible }),
+    setLayoutFullSizeContent: fullSizeContent => store.dispatch({ type: layoutStates.FULL_SIZE_CONTENT, fullSizeContent: fullSizeContent }),
+    setPlaylistResults: results => store.dispatch({ type: playlistStates.RESULT, result: results }),
+    setPlaylistLoading: isLoading => store.dispatch({ type: playlistStates.LOADING, loading: isLoading }),
+    setPlaylistError: error => store.dispatch({ type: playlistStates.ERROR, error: error }),
+    setPlayerVisible: visible => store.dispatch({ type: playerState.VISIBLE, visible: visible }),
+    setPlayerNextUris: uris => store.dispatch({ type: playerState.NEXT_URIS, nextUris: uris }),
+    setPlayerCurrentUri: uri => store.dispatch({ type: playerState.CURRENT_URI, currentUri: uri }),
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Playlist));
+export default connect(mapStateToProps, mapDispatchToProps)(Playlist);
