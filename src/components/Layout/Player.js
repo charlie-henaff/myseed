@@ -1,5 +1,5 @@
-import { ComputerRounded, DevicesRounded, KeyboardArrowUpRounded, PauseRounded, PlayArrowRounded, SkipNextRounded, VolumeUpRounded } from '@mui/icons-material';
-import { Box, CardMedia, colors, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Popover, Slide, Slider, Typography } from '@mui/material';
+import { AddRounded, ComputerRounded, DevicesRounded, KeyboardArrowUpRounded, PauseRounded, PlayArrowRounded, SkipNextRounded, VolumeUpRounded } from '@mui/icons-material';
+import { Box, Button, CardMedia, colors, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Popover, Slide, Slider, Typography } from '@mui/material';
 import { withStyles } from '@mui/styles';
 import PropTypes from 'prop-types';
 import { Component } from 'react';
@@ -93,6 +93,7 @@ class Player extends Component {
                 this.getDevices();
             });
 
+            player.activateElement();
             player.connect();
 
             setTimeout(() => resolve(player), 1000);
@@ -235,7 +236,7 @@ class Player extends Component {
                     <Box className={classes.shape}>
                         <Box className={classes.content}>
 
-                            {/* {!this.state.localPlayerActivated & this.state.isPlayedLocally 
+                            {!this.state.localPlayerActivated & this.state.isPlayedLocally 
                                 ?
                                 <Box p={3} sx={{ mx: 'auto'}}>
                                     <Button size="large" sx={{color: 'white'}} endIcon={<AddRounded />} onClick={() => this.activateLocalPlayer()}>
@@ -243,7 +244,7 @@ class Player extends Component {
                                     </Button>
                                 </Box>
                                 :
-                                <> */}
+                                <>
                                     {this.state.img &&
                                         <Box className={classes.leftControls}>
                                             <CardMedia className={classes.albumCardMedia} image={this.state.img}>
@@ -302,8 +303,8 @@ class Player extends Component {
                                         {this.devicesMenuRender()}
                                         {this.popupVolumeRender()}
                                     </Box>
-                                {/* </>
-                            } */}
+                                </>
+                            }
 
                         </Box>
                     </Box>
