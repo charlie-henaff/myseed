@@ -1,7 +1,7 @@
 {
     "name": "MySeed",
     "short_name": "MySeed",
-    "start_url": "index.html",
+    "start_url": "../index.html",
     "display": "standalone",
     "icons": [
         {
