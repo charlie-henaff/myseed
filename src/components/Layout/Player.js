@@ -1,5 +1,5 @@
 import { AddRounded, ComputerRounded, DevicesRounded, KeyboardArrowUpRounded, PauseRounded, PlayArrowRounded, SkipNextRounded, VolumeUpRounded } from '@mui/icons-material';
-import { Box, Button, CardMedia, colors, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Popover, Slide, Slider, Typography } from '@mui/material';
+import { Box, Button, CardMedia, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Popover, Slide, Slider, Typography, colors } from '@mui/material';
 import { withStyles } from '@mui/styles';
 import PropTypes from 'prop-types';
 import { Component } from 'react';
@@ -31,7 +31,7 @@ class Player extends Component {
         artist: '',
         img: '',
         uri: '',
-        volume: 50,
+        volume: 100,
         openVolumePopoverAnchor: null,
         devices: {
             list: [],
