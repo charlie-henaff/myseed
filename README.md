@@ -1,7 +1,10 @@
 ![License](https://img.shields.io/github/license/charlie-henaff/myseed)
 
->**Test with a Spotify public user**  
->url: &emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp;&nbsp; [charlie-henaff.github.io/myseed](https://charlie-henaff.github.io/myseed)  
+>**Test this app with a Spotify test account**  
+>at [charlie-henaff.github.io/myseed](https://charlie-henaff.github.io/myseed) 
+>
+>*Player unavailable due to non-premium test account*
+>
 >email : &emsp;&emsp;&emsp;&nbsp; myseed@yopmail.com   
 >password : &emsp;&ensp; myseedpwd
 
