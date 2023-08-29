@@ -42,6 +42,7 @@ class Search extends Component {
 
         this.props.setPlayerVisible(true);
 
+        store.dispatch({ type: appBarStates.TITLE, title: "Explorer"})
         store.dispatch({ type: layoutStates.VISIBLE, visible: true });
         store.dispatch({ type: layoutStates.FULL_SIZE_CONTENT, fullSizeContent: false });
 
@@ -184,11 +185,17 @@ class Search extends Component {
 const styles = (theme) => ({
     artistContainer: {
         [theme.breakpoints.up('sm')]: {
+            paddingRight: theme.spacing(2),
+        },
+        [theme.breakpoints.up('md')]: {
             paddingRight: theme.spacing(4),
         }
     },
     albumContainer: {
         [theme.breakpoints.up('sm')]: {
+            paddingLeft: theme.spacing(2),
+        },
+        [theme.breakpoints.up('md')]: {
             paddingLeft: theme.spacing(4),
         }
     }
