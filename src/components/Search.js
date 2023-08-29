@@ -42,7 +42,7 @@ class Search extends Component {
 
         this.props.setPlayerVisible(true);
 
-        store.dispatch({ type: appBarStates.TITLE, title: "Explorer"})
+        store.dispatch({ type: appBarStates.TITLE, title: "Explorer" })
         store.dispatch({ type: layoutStates.VISIBLE, visible: true });
         store.dispatch({ type: layoutStates.FULL_SIZE_CONTENT, fullSizeContent: false });
 
