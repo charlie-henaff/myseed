@@ -157,7 +157,7 @@ class Search extends Component {
                     )}
 
                     {tracks && (
-                        <Grid container py={1}>
+                        <Grid container pt={1} pb={2}>
                             <Typography variant="h6" gutterBottom>Musiques</Typography>
                             <Grid container spacing={2}>
                                 {tracks.map((item, index) => {
