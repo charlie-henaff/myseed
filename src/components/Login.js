@@ -1,22 +1,22 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
 import { Container } from '@mui/material';
-import { withStyles } from '@mui/styles';
+import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
-import DialogActions from '@mui/material/DialogActions';
-import Button from '@mui/material/Button';
+import DialogTitle from '@mui/material/DialogTitle';
+import { withStyles } from '@mui/styles';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import bgImg from '../assets/img/woman_looking_through_records_at_vinyl_shop.jpg';
+import { APP_CONST } from '../constants';
+import history from '../history';
 import { layoutStates } from '../redux/reducers/layout';
 import { snackBarSeverity, snackBarState } from "../redux/reducers/layout/snackBar";
-import bgImg from '../assets/img/woman_looking_through_records_at_vinyl_shop.jpg';
 import store from '../redux/store';
-import history from '../history';
-import * as SpotifyServices from '../services/SpotifyServices';
 import { logged } from '../services/LoginServices';
-import { APP_CONST } from '../constants';
+import * as SpotifyServices from '../services/SpotifyServices';
 
 class LoginComponent extends Component {
 
@@ -82,7 +82,6 @@ const styles = theme => ({
         backgroundRepeat: 'no-repeat',
         backgroundAttachment: 'fixed',
         backgroundSize: 'cover'
-
     }
 });
 

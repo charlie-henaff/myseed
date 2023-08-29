@@ -1,4 +1,4 @@
-import { Box, ButtonBase, Card, CardMedia, Grid, Typography, colors } from "@mui/material";
+import { Box, ButtonBase, Card, CardMedia, Typography, colors } from "@mui/material";
 import { withStyles } from '@mui/styles';
 import PropTypes from "prop-types";
 import React, { Component } from "react";
@@ -20,6 +20,7 @@ class Track extends Component {
         avatarUrl: PropTypes.string,
         onCardClick: PropTypes.func,
         selected: PropTypes.bool
+
     };
 
     render() {
@@ -32,24 +33,20 @@ class Track extends Component {
         };
 
         return (
-            <>
-                <Grid item xs={6} sm={4} md={2} xl={1}>
-                    <Card className={classes.root}
-                        onMouseOver={() => setHover(true)}
-                        onMouseOut={() => setHover(false)}
-                        onClick={onCardClick}>
-                        <ButtonBase className={classes.button}>
-                            <CardMedia className={classes.media} image={avatarUrl ? avatarUrl : imgTest} loading="lazy">
-                                <Overlay color={colors.grey["900"]} opacity={!hover ? 0.3 : 0} />
-                                {selected && <AnimatedSoundWaveIcon sx={{ width: 34, margin: 8, position: 'absolute', bottom: 0, right: 0 }} />}
-                                <Box className={classes.content} p={2}>
-                                    <Typography variant="overline" className={classes.name}>{name}</Typography>
-                                </Box>
-                            </CardMedia>
-                        </ButtonBase>
-                    </Card>
-                </Grid>
-            </>
+            <Card className={classes.root}
+                onMouseOver={() => setHover(true)}
+                onMouseOut={() => setHover(false)}
+                onClick={onCardClick}>
+                <ButtonBase className={classes.button}>
+                    <CardMedia className={classes.media} image={avatarUrl ? avatarUrl : imgTest} loading="lazy">
+                        <Overlay color={colors.grey["900"]} opacity={!hover ? 0.3 : 0} />
+                        {selected && <AnimatedSoundWaveIcon sx={{ width: 34, margin: 8, position: 'absolute', bottom: 0, right: 0 }} />}
+                        <Box className={classes.content} p={2}>
+                            <Typography variant="overline" className={classes.name}>{name}</Typography>
+                        </Box>
+                    </CardMedia>
+                </ButtonBase>
+            </Card>
         );
     }
 };

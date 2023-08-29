@@ -90,12 +90,16 @@ class Playlist extends Component {
                         <Box py={2}>
                             <Grid container spacing={2}>
                                 {tracks.map((item, index) => {
-                                    return <Track name={item.name}
-                                        avatarUrl={item.album?.images[1].url}
-                                        key={"artist_" + item.id}
-                                        onCardClick={() => this.startPLaylistHere(index)}
-                                        selected={currentUri && currentUri === item.uri}
-                                    />
+                                    return (
+                                        <Grid item xs={6} sm={4} md={2} xl={1}>
+                                            <Track name={item.name}
+                                                avatarUrl={item.album?.images[1].url}
+                                                key={"artist_" + item.id}
+                                                onCardClick={() => this.startPLaylistHere(index)}
+                                                selected={currentUri && currentUri === item.uri}
+                                            />
+                                        </Grid>
+                                    )
                                 })}
                             </Grid>
                         </Box>
