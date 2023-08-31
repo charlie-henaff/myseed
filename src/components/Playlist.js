@@ -145,7 +145,7 @@ class Playlist extends Component {
                         <Typography id="energy-label" gutterBottom>Energie</Typography>
                         <Stack spacing={4} direction="row" alignItems='center'>
                             {tuneMenu.energy != null ? <BoltRounded /> : <FilterAltOffRounded />}
-                            <Slider aria-aria-labelledby="energy-label" min={0} max={1} step={0.01} value={tuneMenu.energy} className={classes.slider}
+                            <Slider aria-labelledby="energy-label" min={0} max={1} step={0.01} value={tuneMenu.energy} className={classes.slider}
                                 onChange={(event, value) => this.setEnergy(value)}
                                 onChangeCommitted={() => this.getTopRecomendations()} />
                             <IconButton onClick={() => this.disableEnergy()}>
