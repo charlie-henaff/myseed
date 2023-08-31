@@ -2,7 +2,8 @@ import { combineReducers } from 'redux';
 
 export const appBarStates = {
   SEARCH: 'APP_BAR_SEARCH',
-  TITLE: 'APP_BAR_TITLE'
+  TITLE: 'APP_BAR_TITLE',
+  RIGHT_COMPONENT: 'APP_BAR_RIGHT_COMPONENT'
 };
 
 export function search(state = "", action) {
@@ -25,4 +26,14 @@ export function title(state = "", action) {
   }
 }
 
-export default combineReducers({search, title});
+export function rightComponent(state = null, action) {
+    switch (action.type) {
+      case appBarStates.RIGHT_COMPONENT:
+        return action.rightComponent;
+  
+      default:
+        return state;
+    }
+  }
+
+export default combineReducers({search, title, rightComponent});

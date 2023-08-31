@@ -2,7 +2,8 @@ import { fetch as spotifyFetch } from "./SpotifyServices";
 
 export const recommendations = (artistsSeeds = [], tracksSeeds = []) => {
     let params = [
-        "limit=84"
+        "limit=84",
+        // "target_energy=0"
     ];
 
     if (artistsSeeds.length > 0) {

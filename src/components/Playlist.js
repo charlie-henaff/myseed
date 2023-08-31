@@ -1,4 +1,5 @@
-import { Box, Container, Grid, LinearProgress } from '@mui/material';
+import { TuneRounded } from '@mui/icons-material';
+import { Box, Container, Grid, IconButton, LinearProgress, Menu } from '@mui/material';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -22,6 +23,7 @@ class Playlist extends Component {
         currentUri: PropTypes.string,
 
         setAppBarTitle: PropTypes.func.isRequired,
+        setAppBarRightComponent: PropTypes.func.isRequired,
         setLayoutVisible: PropTypes.func.isRequired,
         setLayoutFullSizeContent: PropTypes.func.isRequired,
         setPlaylistResults: PropTypes.func.isRequired,
@@ -32,29 +34,40 @@ class Playlist extends Component {
         setPlayerCurrentUri: PropTypes.func.isRequired,
     };
 
+    state = {
+        tuneMenu: {
+            open: false,
+            anchor: null
+        }
+    };
+
     componentDidMount() {
         if (!localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_TOKEN)) {
             history.push('/login');
         }
 
-        const {
-            setAppBarTitle,
-            setLayoutVisible,
-            setLayoutFullSizeContent,
-            setPlayerVisible
-        } = this.props;
+        this.props.setAppBarTitle('Playlist');
+        this.props.setAppBarRightComponent(this.renderAppBarTune())
 
-        setAppBarTitle('Playlist');
-        setLayoutVisible(true);
-        setLayoutFullSizeContent(false);
-        setPlayerVisible(true);
+        this.props.setLayoutVisible(true);
+        this.props.setLayoutFullSizeContent(false);
+        this.props.setPlayerVisible(true);
 
         this.getTopRecomendations();
     }
 
     componentWillUnmount() {
-        const { setPlayerVisible } = this.props;
-        setPlayerVisible(false);
+        this.props.setAppBarTitle('');
+        this.props.setAppBarRightComponent(null);
+        this.props.setLayoutVisible(false);
+        this.props.setLayoutFullSizeContent(true);
+        this.props.setPlayerVisible(false);
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (prevState.tuneMenu.open !== this.state.tuneMenu.open) {
+            this.props.setAppBarRightComponent(this.renderAppBarTune())
+        }
     }
 
 
@@ -82,6 +95,10 @@ class Playlist extends Component {
             currentUri,
         } = this.props;
 
+        const { tuneMenu } = this.state;
+
+        console.log(tuneMenu);
+
         return (
             <>
                 {isLoading && <LinearProgress color="secondary" />}
@@ -105,6 +122,46 @@ class Playlist extends Component {
                         </Box>
                     )}
                 </Container>
+                <Menu
+                    id="tunePlaylistMenu"
+                    open={tuneMenu.open}
+                    onClose={() => this.setState({ tuneMenu: { ...tuneMenu, anchor: null } })}
+                    PaperProps={{
+                        elevation: 1,
+                        sx: {
+                            minHeight: 200,
+                            minWidth: 200,
+                            maxHeight: 200,
+                            marginBottom: 150,
+                            overflow: 'auto',
+                            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                        },
+                    }}
+                >
+                    {/* {this.state.devices.list && this.state.devices.list.map(device =>
+    <MenuItem dense key={device.id} onClick={() => this.updatePlayingDevices(device.id)}>
+        <ListItemIcon sx={{ color: device.id === localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID) ? theme.palette.secondary.main : '' }}><ComputerRounded fontSize="small" /></ListItemIcon>
+        <ListItemText sx={{ color: device.id === localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID) ? theme.palette.secondary.main : '' }}>{device.name}</ListItemText>
+    </MenuItem>
+)} */}
+                </Menu>
+            </>
+        );
+    }
+
+    renderAppBarTune() {
+        const { tuneMenu } = this.state;
+        return (
+            <>
+                <IconButton
+                    color="inherit"
+                    edge="end"
+                    aria-controls={tuneMenu.open ? 'tunePlaylistMenu' : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={tuneMenu.open ? 'true' : undefined}
+                    onClick={event => this.setState({ tuneMenu: { ...tuneMenu, open: !tuneMenu.open, anchor: !tuneMenu.open ? event.currentTarget : null } })}>
+                    <TuneRounded />
+                </IconButton>
             </>
         );
     }
@@ -120,6 +177,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
     setAppBarTitle: title => store.dispatch({ type: appBarStates.TITLE, title: title }),
+    setAppBarRightComponent: component => store.dispatch({ type: appBarStates.RIGHT_COMPONENT, rightComponent: component }),
     setLayoutVisible: visible => dispatch({ type: layoutStates.VISIBLE, visible: visible }),
     setLayoutFullSizeContent: fullSizeContent => store.dispatch({ type: layoutStates.FULL_SIZE_CONTENT, fullSizeContent: fullSizeContent }),
     setPlaylistResults: results => store.dispatch({ type: playlistStates.RESULT, result: results }),
