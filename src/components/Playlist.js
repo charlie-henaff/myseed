@@ -1,5 +1,6 @@
-import { TuneRounded } from '@mui/icons-material';
-import { Box, Container, Grid, IconButton, LinearProgress, Menu } from '@mui/material';
+import { BoltRounded, DeleteRounded, FilterAltOffRounded, TuneRounded } from '@mui/icons-material';
+import { Box, Container, Grid, IconButton, LinearProgress, Popover, Slider, Stack, Typography } from '@mui/material';
+import { withStyles } from '@mui/styles';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -14,6 +15,19 @@ import { topsRecommendations } from '../services/PlaylistServices';
 import { fetch as spotifyFetch } from '../services/SpotifyServices';
 import Track from './Util/Card/Track';
 
+const AppBarTunePlaylistIcon = ({ open, onClick }) => {
+    return (
+        <IconButton
+            color="inherit"
+            edge="end"
+            aria-controls={open ? 'tunePlaylistMenu' : undefined}
+            aria-haspopup="true"
+            aria-expanded={open ? 'true' : undefined}
+            onClick={(event) => onClick(event)}>
+            <TuneRounded />
+        </IconButton>
+    );
+};
 
 class Playlist extends Component {
 
@@ -37,7 +51,8 @@ class Playlist extends Component {
     state = {
         tuneMenu: {
             open: false,
-            anchor: null
+            anchor: null,
+            energy: null
         }
     };
 
@@ -46,8 +61,15 @@ class Playlist extends Component {
             history.push('/login');
         }
 
+        const { tuneMenu } = this.state;
+
         this.props.setAppBarTitle('Playlist');
-        this.props.setAppBarRightComponent(this.renderAppBarTune())
+        this.props.setAppBarRightComponent(
+            <AppBarTunePlaylistIcon
+                open={tuneMenu.open}
+                onClick={(event) => this.openTuneMenu(event.currentTarget)}
+            />
+        );
 
         this.props.setLayoutVisible(true);
         this.props.setLayoutFullSizeContent(false);
@@ -64,17 +86,11 @@ class Playlist extends Component {
         this.props.setPlayerVisible(false);
     }
 
-    componentDidUpdate(prevProps, prevState) {
-        if (prevState.tuneMenu.open !== this.state.tuneMenu.open) {
-            this.props.setAppBarRightComponent(this.renderAppBarTune())
-        }
-    }
-
-
-    getTopRecomendations = () => {
+    getTopRecomendations() {
         const { setPlaylistLoading, setPlaylistResults, setPlaylistError } = this.props;
+        const { tuneMenu } = this.state;
         setPlaylistLoading(true);
-        topsRecommendations()
+        topsRecommendations({ energy: tuneMenu.energy })
             .then(result => setPlaylistResults(result.tracks))
             .finally(() => setPlaylistLoading(false))
             .catch(error => error.message && setPlaylistError(error.message || "Une erreur est survenue."));
@@ -88,20 +104,61 @@ class Playlist extends Component {
         setPlayerCurrentUri(selectedUri);
     }
 
+    openTuneMenu(anchor) {
+        const { tuneMenu } = this.state;
+        this.setState({ tuneMenu: { ...tuneMenu, open: true, anchor: anchor } })
+    }
+
+    setEnergy(value) {
+        const { tuneMenu } = this.state;
+        this.setState({ tuneMenu: { ...tuneMenu, energy: value } });
+    }
+
+    disableEnergy() {
+        this.setEnergy(0);
+        this.setEnergy(null);
+        this.getTopRecomendations();
+    }
+
     render() {
         const {
             isLoading,
             tracks,
             currentUri,
+            classes
         } = this.props;
 
         const { tuneMenu } = this.state;
 
-        console.log(tuneMenu);
-
         return (
             <>
+                {/* Tune playlist controls */}
+                <Popover
+                    open={tuneMenu.open}
+                    anchorEl={tuneMenu.anchor}
+                    onClose={() => this.setState({ tuneMenu: { ...tuneMenu, open: false, anchor: null } })}
+                    anchorOrigin={{
+                        vertical: 58,
+                        horizontal: 'left',
+                    }}>
+                    <Box p={2}>
+                        <Typography id="energy-label" gutterBottom>Energie</Typography>
+                        <Stack spacing={4} direction="row" alignItems='center'>
+                            {tuneMenu.energy != null ? <BoltRounded /> : <FilterAltOffRounded />}
+                            <Slider aria-aria-labelledby="energy-label" min={0} max={1} step={0.01} value={tuneMenu.energy} className={classes.slider}
+                                onChange={(event, value) => this.setEnergy(value)}
+                                onChangeCommitted={() => this.getTopRecomendations()} />
+                            <IconButton onClick={() => this.disableEnergy()}>
+                                <DeleteRounded color='error' />
+                            </IconButton>
+                        </Stack>
+                    </Box>
+                </Popover>
+
+                {/* Page loader */}
                 {isLoading && <LinearProgress color="secondary" />}
+
+                {/* Playlist result items */}
                 <Container maxWidth={false}>
                     {isLoading || !tracks ? "" : (
                         <Box py={2}>
@@ -122,50 +179,19 @@ class Playlist extends Component {
                         </Box>
                     )}
                 </Container>
-                <Menu
-                    id="tunePlaylistMenu"
-                    open={tuneMenu.open}
-                    onClose={() => this.setState({ tuneMenu: { ...tuneMenu, anchor: null } })}
-                    PaperProps={{
-                        elevation: 1,
-                        sx: {
-                            minHeight: 200,
-                            minWidth: 200,
-                            maxHeight: 200,
-                            marginBottom: 150,
-                            overflow: 'auto',
-                            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-                        },
-                    }}
-                >
-                    {/* {this.state.devices.list && this.state.devices.list.map(device =>
-    <MenuItem dense key={device.id} onClick={() => this.updatePlayingDevices(device.id)}>
-        <ListItemIcon sx={{ color: device.id === localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID) ? theme.palette.secondary.main : '' }}><ComputerRounded fontSize="small" /></ListItemIcon>
-        <ListItemText sx={{ color: device.id === localStorage.getItem(APP_CONST.LOCAL_STORAGE.SPOTIFY_CURRENT_DEVICE_ID) ? theme.palette.secondary.main : '' }}>{device.name}</ListItemText>
-    </MenuItem>
-)} */}
-                </Menu>
-            </>
-        );
-    }
-
-    renderAppBarTune() {
-        const { tuneMenu } = this.state;
-        return (
-            <>
-                <IconButton
-                    color="inherit"
-                    edge="end"
-                    aria-controls={tuneMenu.open ? 'tunePlaylistMenu' : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={tuneMenu.open ? 'true' : undefined}
-                    onClick={event => this.setState({ tuneMenu: { ...tuneMenu, open: !tuneMenu.open, anchor: !tuneMenu.open ? event.currentTarget : null } })}>
-                    <TuneRounded />
-                </IconButton>
             </>
         );
     }
 }
+
+const styles = (theme) => ({
+    slider: {
+        minWidth: 190,
+        [theme.breakpoints.up('sm')]: {
+            minWidth: 400,
+        },
+    }
+});
 
 const mapStateToProps = state => {
     const isLoading = state.app.playlist.loading;
@@ -188,4 +214,4 @@ const mapDispatchToProps = dispatch => ({
     setPlayerCurrentUri: uri => store.dispatch({ type: playerState.CURRENT_URI, currentUri: uri }),
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(Playlist);
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Playlist));
