@@ -80,7 +80,7 @@ class AppBar extends Component {
                                 placeholder="Rechercher..."
                                 className={classes.searchInput}
                                 value={searchInput && searchInput}
-                                inputProps={{ 'aria-label': 'search' }}
+                                inputProps={{ 'aria-label': 'search', type: 'search' }}
                                 onChange={(event) => this.search(event.target.value)}
                                 onKeyDown={(event) => {
                                     if (event.key === "Enter") this.search(event.target.value);
