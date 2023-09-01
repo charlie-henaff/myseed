@@ -11,8 +11,15 @@ export const recommendations = (artistsSeeds = [], tracksSeeds = [], optional = 
     if (tracksSeeds.length > 0) {
         params.push(`seed_tracks=${tracksSeeds.join(',')}`);
     }
+
     if (optional.energy !== undefined && optional.energy !== null) {
         params.push(`target_energy=${optional.energy.toString()}`);
+    }
+    if (optional.acousticness !== undefined && optional.acousticness !== null) {
+        params.push(`target_acousticness=${optional.acousticness.toString()}`);
+    }
+    if (optional.popularity !== undefined && optional.popularity !== null) {
+        params.push(`target_popularity=${optional.popularity.toString()}`);
     }
 
     return spotifyFetch(`/recommendations?${params.join('&')}`, { method: 'get' });

@@ -1,4 +1,4 @@
-import { BoltRounded, DeleteRounded, FilterAltOffRounded, TuneRounded } from '@mui/icons-material';
+import { BoltRounded, DeleteRounded, FilterAltOffRounded, GroupsRounded, PianoRounded, TuneRounded } from '@mui/icons-material';
 import { Box, Container, Grid, IconButton, LinearProgress, Popover, Slider, Stack, Typography } from '@mui/material';
 import { withStyles } from '@mui/styles';
 import PropTypes from 'prop-types';
@@ -29,6 +29,25 @@ const AppBarTunePlaylistIcon = ({ open, onClick }) => {
     );
 };
 
+const AppBarTuneMenuSlider = ({ label, icon, min, max, step, value, onChange, onChangeCommitted, disable }) => {
+    return (
+        <>
+            <Typography>{label}</Typography>
+            <Stack spacing={4} direction="row" alignItems='center'>
+                {value != null ? icon : <FilterAltOffRounded />}
+                <Slider
+                    min={min} max={max} step={step} value={value}
+                    onChange={onChange}
+                    onChangeCommitted={onChangeCommitted}
+                />
+                <IconButton onClick={disable}>
+                    <DeleteRounded color='error' />
+                </IconButton>
+            </Stack>
+        </>
+    );
+}
+
 class Playlist extends Component {
 
     static propTypes = {
@@ -52,7 +71,9 @@ class Playlist extends Component {
         tuneMenu: {
             open: false,
             anchor: null,
-            energy: null
+            energy: null,
+            acousticness: null,
+            popularity: null,
         }
     };
 
@@ -89,8 +110,14 @@ class Playlist extends Component {
     getTopRecomendations() {
         const { setPlaylistLoading, setPlaylistResults, setPlaylistError } = this.props;
         const { tuneMenu } = this.state;
+
         setPlaylistLoading(true);
-        topsRecommendations({ energy: tuneMenu.energy })
+
+        topsRecommendations({
+            energy: tuneMenu.energy,
+            acousticness: tuneMenu.acousticness,
+            popularity: tuneMenu.popularity,
+        })
             .then(result => setPlaylistResults(result.tracks))
             .finally(() => setPlaylistLoading(false))
             .catch(error => error.message && setPlaylistError(error.message || "Une erreur est survenue."));
@@ -120,6 +147,28 @@ class Playlist extends Component {
         this.getTopRecomendations();
     }
 
+    setAcousticness(value) {
+        const { tuneMenu } = this.state;
+        this.setState({ tuneMenu: { ...tuneMenu, acousticness: value } });
+    }
+
+    disableAcousticness() {
+        this.setAcousticness(0);
+        this.setAcousticness(null);
+        this.getTopRecomendations();
+    }
+
+    setPopularity(value) {
+        const { tuneMenu } = this.state;
+        this.setState({ tuneMenu: { ...tuneMenu, popularity: value } });
+    }
+
+    disablePopularity() {
+        this.setPopularity(0);
+        this.setPopularity(null);
+        this.getTopRecomendations();
+    }
+
     render() {
         const {
             isLoading,
@@ -137,22 +186,47 @@ class Playlist extends Component {
                     open={tuneMenu.open}
                     anchorEl={tuneMenu.anchor}
                     onClose={() => this.setState({ tuneMenu: { ...tuneMenu, open: false, anchor: null } })}
+                    PaperProps={{ className: classes.tuneMenuPopoverPaper }}
                     anchorOrigin={{
                         vertical: 58,
                         horizontal: 'left',
-                    }}>
-                    <Box p={2}>
-                        <Typography id="energy-label" gutterBottom>Energie</Typography>
-                        <Stack spacing={4} direction="row" alignItems='center'>
-                            {tuneMenu.energy != null ? <BoltRounded /> : <FilterAltOffRounded />}
-                            <Slider aria-labelledby="energy-label" min={0} max={1} step={0.01} value={tuneMenu.energy} className={classes.slider}
+                    }}
+                >
+                    <Grid container direction="column" spacing={2} p={2} >
+                        <Grid item>
+                            <AppBarTuneMenuSlider
+                                label={`Niveau d'énergie (${tuneMenu.energy == null ? 'désactivé' : parseInt(tuneMenu.energy * 100) + '%'})`}
+                                icon={<BoltRounded />}
+                                min={0} max={1} step={0.01}
+                                value={tuneMenu.energy}
                                 onChange={(event, value) => this.setEnergy(value)}
-                                onChangeCommitted={() => this.getTopRecomendations()} />
-                            <IconButton onClick={() => this.disableEnergy()}>
-                                <DeleteRounded color='error' />
-                            </IconButton>
-                        </Stack>
-                    </Box>
+                                onChangeCommitted={() => this.getTopRecomendations()}
+                                disable={() => this.disableEnergy()}
+                            />
+                        </Grid>
+                        <Grid item >
+                            <AppBarTuneMenuSlider
+                                label={`Niveau d'accousticité (${tuneMenu.acousticness == null ? 'désactivé' : parseInt(tuneMenu.acousticness * 100) + '%'})`}
+                                icon={<PianoRounded />}
+                                min={0} max={1} step={0.01}
+                                value={tuneMenu.acousticness}
+                                onChange={(event, value) => this.setAcousticness(value)}
+                                onChangeCommitted={() => this.getTopRecomendations()}
+                                disable={() => this.disableAcousticness()}
+                            />
+                        </Grid>
+                        <Grid item >
+                            <AppBarTuneMenuSlider
+                                label={`Niveau de popularité (${tuneMenu.popularity == null ? 'désactivé' : parseInt(tuneMenu.popularity) + '%'})`}
+                                icon={<GroupsRounded />}
+                                min={0} max={100} step={1}
+                                value={tuneMenu.popularity}
+                                onChange={(event, value) => this.setPopularity(value)}
+                                onChangeCommitted={() => this.getTopRecomendations()}
+                                disable={() => this.disablePopularity()}
+                            />
+                        </Grid>
+                    </Grid>
                 </Popover>
 
                 {/* Page loader */}
@@ -185,10 +259,13 @@ class Playlist extends Component {
 }
 
 const styles = (theme) => ({
-    slider: {
-        minWidth: 190,
+    tuneMenuPopoverPaper: {
+        width: '100%',
         [theme.breakpoints.up('sm')]: {
-            minWidth: 400,
+            width: '60%',
+        },
+        [theme.breakpoints.up('xl')]: {
+            width: '30%',
         },
     }
 });
