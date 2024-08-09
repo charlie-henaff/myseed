@@ -27,7 +27,9 @@ make            # show help
 make start      # start project
 ```
 
-After start, application should be available at [localhost:3000](https://localhost:3000)
+After start, you should create an app on [spotify developer dashboard](https://developer.spotify.com/dashboard) with parameters : 
+- Website: http://localhost
+- Redirect URIs: http://localhost/login
 
 # Concept
 

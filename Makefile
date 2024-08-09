@@ -1,14 +1,10 @@
 -include .env .env.local
 
-CURRENT_UID         = $(shell id -u)
-CURRENT_GID         = $(shell id -g)
-CURRENT_PATH        = $(shell pwd)
-
 NODE_IMG            = node:lts-alpine
-NODE_PORTS          = 3000:3000
+NODE_PORTS          = 80:3000
 
-DOCKER_VOLUMES      = -v $(CURRENT_PATH):/usr/src
-DOCKER_RUN          = docker run $(DOCKER_EXTRA_PARAMS) --rm -u $(CURRENT_UID):$(CURRENT_GID) 
+DOCKER_VOLUMES      = -v ./:/usr/src
+DOCKER_RUN          = docker run $(DOCKER_EXTRA_PARAMS) --rm -u 1000:1000
 DOCKER_RUN_NODE     = $(DOCKER_RUN) -w /usr/src $(DOCKER_VOLUMES) -p $(NODE_PORTS) $(NODE_IMG)
 
 .DEFAULT_GOAL :=    help
@@ -59,37 +55,30 @@ npx: ## args: c="[command]" - Execute a npx command
 ## 
 ##Dependencies
 ##-----------------------------------------------------------------------------
-.PHONY: installReq install update
+.PHONY: install update
 
-installReq: package-lock.json 
-
-package-lock.json: package.json
+node_modules: package.json
 	@$(DOCKER_RUN_NODE) npm install
 
-install: | package.json ## Install dependencies
+install: package.json ## Install dependencies
 	@$(DOCKER_RUN_NODE) npm install
 
-update: | package.json ## Update dependencies
+update: package.json ## Update dependencies
 	@$(DOCKER_RUN_NODE) npm update
 
 
 ## 
 ##Project 
 ##-----------------------------------------------------------------------------
-.PHONY: buildReq build start serve
+.PHONY: build start serve
 
-buildReq: build/
-
-build/: public/ src/ node_modules/
+build: node_modules src public ## Build project
 	@$(DOCKER_RUN_NODE) npm run build
 
-build: installReq | src/ ## Build project
-	@$(DOCKER_RUN_NODE) npm run build
-
-start: installReq | src/ ## Start project
+start: node_modules src ## Start project
 	@$(DOCKER_RUN_NODE) npm start
 
-serve: installReq buildReq ## Serve project
+serve: node_modules build ## Serve project
 	@$(DOCKER_RUN_NODE) sh -c "npm install -g serve && serve -s build"
 
 ##
